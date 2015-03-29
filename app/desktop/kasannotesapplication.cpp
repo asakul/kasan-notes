@@ -2,6 +2,7 @@
 #include "core/filelocator.h"
 #include <QQuickItem>
 #include <QQmlError>
+#include <QScreen>
 #include "log.h"
 #include "core/backends/kasandb/kasandbauthenticator.h"
 #include "core/backends/kasandb/kasandbbackend.h"
@@ -45,6 +46,10 @@ int KasanNotesApplication::run()
 	m_backend = backend;
 	connect(backend.get(), SIGNAL(authenticationCompleted()), this, SLOT(authenticationCompleted()));
 
+	m_view.setFlags(Qt::Dialog);
+	m_view.setVisibility(QWindow::Windowed);
+	m_view.setPosition((m_view.screen()->size().width() - m_view.size().width()) / 2,
+			(m_view.screen()->size().height() - m_view.size().height()) / 2);
 	m_view.show();
 
 	m_backendThread = std::unique_ptr<QThread>(new QThread);
@@ -57,7 +62,10 @@ int KasanNotesApplication::run()
 void KasanNotesApplication::authenticationCompleted()
 {
 	auto locator = createDefaultFileLocator();
+	m_view.setFlags(Qt::Window);
+	m_view.setResizeMode(QQuickView::SizeRootObjectToView);
 	m_view.setSource(QUrl::fromLocalFile(locator->getUiFile("main")));
+	m_view.setVisibility(QWindow::Maximized);
 }
 
 void KasanNotesApplication::registerMetatypes()

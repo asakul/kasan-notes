@@ -4,6 +4,7 @@
 #include <QGuiApplication>
 #include <QThread>
 #include <QQuickView>
+#include <QQmlApplicationEngine>
 #include <memory>
 #include "core/backends/common/backend.h"
 
@@ -26,6 +27,7 @@ private:
 	Backend::Ptr m_backend;
 	std::unique_ptr<QThread> m_backendThread;
 	QQuickView m_view;
+	QQmlApplicationEngine m_engine;
 };
 
 #endif /* APP_DESKTOP_KASANNOTESAPPLICATION_H_ */

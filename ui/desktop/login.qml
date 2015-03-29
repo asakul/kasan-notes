@@ -17,6 +17,12 @@ Rectangle {
 		doLogin(login.text, password.text)
 	}
 
+	Keys.onPressed: {
+		if(event.key == Qt.Key_Return) {
+			emitLoginSignal();
+		}
+	}
+
 	Column {	
 		anchors.centerIn: parent
 		spacing: 10
