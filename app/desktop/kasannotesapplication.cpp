@@ -4,9 +4,9 @@
 #include <QQmlError>
 #include <QScreen>
 #include "log.h"
-#include "core/backends/kasandb/kasandbauthenticator.h"
-#include "core/backends/kasandb/kasandbbackend.h"
-#include "core/backends/kasandb/bmxppacket.h"
+#include "core/backends/evernote/evernotebackend.h"
+
+#include "exceptions.h"
 
 
 KasanNotesApplication::KasanNotesApplication(int& argc, char** argv) : QGuiApplication(argc, argv)
@@ -16,6 +16,7 @@ KasanNotesApplication::KasanNotesApplication(int& argc, char** argv) : QGuiAppli
 	setApplicationName("kasan.notes");
 
 	registerMetatypes();
+	m_mainWindowController.setView(&m_view);
 }
 
 KasanNotesApplication::~KasanNotesApplication()
@@ -27,6 +28,7 @@ int KasanNotesApplication::run()
 	auto locator = createDefaultFileLocator();
 	initLogging(locator->getAppDataFilename("kasan-notes.log"), true);
 
+	/*
 	m_view.setResizeMode(QQuickView::SizeViewToRootObject);
 	m_view.setSource(QUrl::fromLocalFile(locator->getUiFile("login")));
 	if(m_view.status() != QQuickView::Ready)
@@ -39,21 +41,20 @@ int KasanNotesApplication::run()
 		}
 		return -1;
 	}
+	*/
 
-	auto backend = std::make_shared<KasanDbBackend>("127.0.0.1", 5139);
-	QObject* root = m_view.rootObject();
-	QObject::connect(root, SIGNAL(doLogin(QString,QString)), backend.get(), SLOT(authenticate(QString,QString)));
-	m_backend = backend;
-	connect(backend.get(), SIGNAL(authenticationCompleted()), this, SLOT(authenticationCompleted()));
+	auto tokenAndUrl = readTokenAndUrlFromFile("dev-data/dev-token.txt");
+	m_backend = EvernoteBackend::createFromDeveloperToken(tokenAndUrl.first, tokenAndUrl.second);
 
-	m_view.setFlags(Qt::Dialog);
-	m_view.setVisibility(QWindow::Windowed);
-	m_view.setPosition((m_view.screen()->size().width() - m_view.size().width()) / 2,
-			(m_view.screen()->size().height() - m_view.size().height()) / 2);
-	m_view.show();
+	m_mainWindowController.setBackend(m_backend);
+
+	if(m_backend->isAuthenticated())
+	{
+		authenticationCompleted();
+	}
 
 	m_backendThread = std::unique_ptr<QThread>(new QThread);
-	backend->moveToThread(m_backendThread.get());
+	m_backend->moveToThread(m_backendThread.get());
 	m_backendThread->start();
 
 	return exec();
@@ -66,9 +67,26 @@ void KasanNotesApplication::authenticationCompleted()
 	m_view.setResizeMode(QQuickView::SizeRootObjectToView);
 	m_view.setSource(QUrl::fromLocalFile(locator->getUiFile("main")));
 	m_view.setVisibility(QWindow::Maximized);
+
+	auto root = m_view.rootObject();
+	auto toolbar = root->findChild<QObject*>("toolbar");
+
+	connect(toolbar, SIGNAL(addButtonClicked()), &m_mainWindowController, SLOT(addButtonClicked()));
 }
 
 void KasanNotesApplication::registerMetatypes()
 {
-	qRegisterMetaType<BmxpPacket::Ptr>("BmxpPacket::Ptr");
+	//qRegisterMetaType<BmxpPacket::Ptr>("BmxpPacket::Ptr");
+}
+
+QPair<QString,QString> KasanNotesApplication::readTokenAndUrlFromFile(const QString& path)
+{
+	QFile file(path);
+	if(!file.open(QIODevice::ReadOnly))
+		BOOST_THROW_EXCEPTION(FileNotFound() << error_message(tr("Unable to open file with token/url: %1").arg(path)));
+
+	auto token = file.readLine();
+	auto url = file.readLine();
+
+	return qMakePair(token, url);
 }

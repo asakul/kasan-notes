@@ -7,6 +7,7 @@
 #include <QQmlApplicationEngine>
 #include <memory>
 #include "core/backends/common/backend.h"
+#include "mainwindowcontroller.h"
 
 class KasanNotesApplication : public QGuiApplication
 {
@@ -22,12 +23,14 @@ private slots:
 
 private:
 	void registerMetatypes();
+    QPair<QString,QString> readTokenAndUrlFromFile(const QString& path);
 
 private:
 	Backend::Ptr m_backend;
 	std::unique_ptr<QThread> m_backendThread;
 	QQuickView m_view;
 	QQmlApplicationEngine m_engine;
+	MainWindowController m_mainWindowController;
 };
 
 #endif /* APP_DESKTOP_KASANNOTESAPPLICATION_H_ */

@@ -8,29 +8,50 @@ Rectangle {
 
 	color: "#404244"
 
-	SplitView {
+	RowLayout {
+		spacing: 1
 		anchors.fill: parent
-		orientation: Qt.Horizontal
+		anchors.margins: 1
+		Layout.fillHeight: true
 
-		Rectangle {
-			width: 200
-			Layout.maximumWidth: 400
-			color: "#ededed"
+		KasanToolBar {
+			id: toolbar
 
-			NotesTree {
-				id: notes
-				anchors.fill: parent
-			}
+			objectName: "toolbar"
+
+			Layout.fillHeight: true
+			Layout.preferredWidth: 60
 		}
 
-		Rectangle {
-			id: noteArea
+		Item {
+			Layout.fillHeight: true
 			Layout.fillWidth: true
-			Layout.minimumWidth: 200
-			color: "lightgray"
+			SplitView {
+				anchors.fill: parent
+				orientation: Qt.Horizontal
 
-			Text {
-				text: "Main panel"
+				Rectangle {
+					width: 200
+					Layout.maximumWidth: 400
+					color: "#ededed"
+
+					NotesTree {
+						id: notes
+						anchors.fill: parent
+					}
+				}
+
+				Rectangle {
+					id: noteArea
+					objectName: "NoteArea"
+					Layout.fillWidth: true
+					Layout.minimumWidth: 200
+					color: "lightgray"
+
+					Text {
+						text: "Main panel"
+					}
+				}
 			}
 		}
 	}

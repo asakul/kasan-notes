@@ -3,6 +3,9 @@ project(kasan-notes)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/3rdparty/cmake")
+
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty)
 
 find_package(Qt5Widgets)
 find_package(Qt5Gui)
@@ -22,22 +25,43 @@ find_package (Boost COMPONENTS system)
 add_definitions(-DBOOST_THREAD_USE_LIB)
 include_directories(${Boost_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS "-g -std=gnu++11 -fPIC")
+set(CMAKE_CXX_FLAGS "-g -std=gnu++14 -fPIC")
 add_definitions(-DELPP_QT_LOGGING)
+
+find_package(Thrift)
+include_directories(${THRIFT_INCLUDE_DIR}/thrift)
 
 set(sources
 	log.cpp
 
 	app/desktop/kasannotesapplication.cpp
 	app/desktop/desktopfilelocator.cpp
+	app/desktop/mainwindowcontroller.cpp
 	
-	core/backends/kasandb/bmxppacket.cpp
-	core/backends/kasandb/bmxpsocket.cpp
-	core/backends/kasandb/kasandbauthenticator.cpp
-	core/backends/kasandb/kasandbbackend.cpp
+	core/backends/common/backend.cpp
+	core/backends/common/note.cpp
+
+	core/backends/evernote/evernotebackend.cpp
+	core/backends/evernote/evernotenote.cpp
 )
 
-add_executable(kasan-notes main.cpp ${sources})
-target_link_libraries(kasan-notes)
+set(evernote-sdk-sources
+    3rdparty/evernote-sdk-cpp/src/Errors_constants.cpp
+    3rdparty/evernote-sdk-cpp/src/Errors_types.cpp
+    3rdparty/evernote-sdk-cpp/src/Limits_constants.cpp
+    3rdparty/evernote-sdk-cpp/src/Limits_types.cpp
+    3rdparty/evernote-sdk-cpp/src/NoteStore_constants.cpp
+    3rdparty/evernote-sdk-cpp/src/NoteStore_types.cpp
+    3rdparty/evernote-sdk-cpp/src/NoteStore.cpp
+    3rdparty/evernote-sdk-cpp/src/Types_constants.cpp
+    3rdparty/evernote-sdk-cpp/src/Types_types.cpp
+    3rdparty/evernote-sdk-cpp/src/UserStore_constants.cpp
+    3rdparty/evernote-sdk-cpp/src/UserStore_types.cpp
+    3rdparty/evernote-sdk-cpp/src/UserStore.cpp
+)
+
+add_executable(kasan-notes main.cpp ${sources} ${evernote-sdk-sources})
+target_link_libraries(kasan-notes ${THRIFT_LIBRARIES})
 
 qt5_use_modules(kasan-notes Widgets Gui Quick Qml Network)
+

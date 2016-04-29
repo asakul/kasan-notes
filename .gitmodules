@@ -1,0 +1,3 @@
+[submodule "3rdparty/evernote-sdk-cpp"]
+	path = 3rdparty/evernote-sdk-cpp
+	url = https://github.com/evernote/evernote-sdk-cpp.git

@@ -26,6 +26,10 @@ struct ProtocolError : public KasanNotesException
 {
 };
 
+struct FormatError : public KasanNotesException
+{
+};
+
 typedef boost::error_info<struct errinfo_str_, std::string> errinfo_str;
 typedef boost::error_info<struct error_message_, QString> error_message;
 
