@@ -30,7 +30,7 @@ public:
 
 private:
 	std::weak_ptr<EvernoteBackend> m_backend;
-	std::string m_guid;
+	QString m_guid;
 	qevercloud::Note m_note;
 };
 

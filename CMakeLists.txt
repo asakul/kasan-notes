@@ -28,9 +28,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 set(CMAKE_CXX_FLAGS "-g -std=gnu++14 -fPIC")
 add_definitions(-DELPP_QT_LOGGING)
 
-find_package(Thrift)
-include_directories(${THRIFT_INCLUDE_DIR}/thrift)
-
 find_library(QEVERCLOUD qt5qevercloud PATHS /usr/local/lib)
 
 set(sources
@@ -46,24 +43,8 @@ set(sources
 	core/backends/evernote/evernotebackend.cpp
 	core/backends/evernote/evernotenote.cpp
 )
-
-set(evernote-sdk-sources
-    3rdparty/evernote-sdk-cpp/src/Errors_constants.cpp
-    3rdparty/evernote-sdk-cpp/src/Errors_types.cpp
-    3rdparty/evernote-sdk-cpp/src/Limits_constants.cpp
-    3rdparty/evernote-sdk-cpp/src/Limits_types.cpp
-    3rdparty/evernote-sdk-cpp/src/NoteStore_constants.cpp
-    3rdparty/evernote-sdk-cpp/src/NoteStore_types.cpp
-    3rdparty/evernote-sdk-cpp/src/NoteStore.cpp
-    3rdparty/evernote-sdk-cpp/src/Types_constants.cpp
-    3rdparty/evernote-sdk-cpp/src/Types_types.cpp
-    3rdparty/evernote-sdk-cpp/src/UserStore_constants.cpp
-    3rdparty/evernote-sdk-cpp/src/UserStore_types.cpp
-    3rdparty/evernote-sdk-cpp/src/UserStore.cpp
-)
-
-add_executable(kasan-notes main.cpp ${sources} ${evernote-sdk-sources})
-target_link_libraries(kasan-notes ${THRIFT_LIBRARIES} ${Boost_LIBRARIES} -lqt5qevercloud)
+add_executable(kasan-notes main.cpp ${sources})
+target_link_libraries(kasan-notes ${Boost_LIBRARIES} -lqt5qevercloud)
 
 qt5_use_modules(kasan-notes Widgets Gui Quick Qml Network)
 
