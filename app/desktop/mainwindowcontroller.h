@@ -7,6 +7,11 @@
 #include "core/backends/common/backend.h"
 #include "core/backends/common/note.h"
 
+#include "core/notestorage/notestorage.h"
+#include "core/notestorage/notestoragemodel.h"
+
+#include <memory>
+
 class MainWindowController : public QObject
 {
 	Q_OBJECT
@@ -28,6 +33,8 @@ private:
 	Backend::Ptr m_backend;
 	QQuickView* m_view;
 	QObject* m_currentNoteEditor;
+	NoteStorage::Ptr m_noteStorage;
+	NoteStorageModel m_noteStorageModel;
 };
 
 #endif // MAINWINDOWCONTROLLER_H

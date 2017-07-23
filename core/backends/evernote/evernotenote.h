@@ -13,6 +13,7 @@ public:
 
 	virtual ~EvernoteNote();
 
+	void setId(const id_t& id);
 	virtual id_t id() const override;
 	virtual QString backendId() const override;
 
@@ -29,9 +30,11 @@ public:
 	QString guid() const { return m_guid; }
 
 private:
+	id_t m_id;
 	std::weak_ptr<EvernoteBackend> m_backend;
 	QString m_guid;
 	qevercloud::Note m_note;
+	QString m_path;
 };
 
 #endif // EVERNOTENOTE_H

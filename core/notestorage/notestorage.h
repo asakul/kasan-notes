@@ -19,6 +19,7 @@ public:
 
 	void addNote(const Note::Ptr& note);
 	Note::Ptr getNote(const Note::id_t& id) const;
+	void clear();
 
 	QList<Note::Ptr> allNotes() const;
 

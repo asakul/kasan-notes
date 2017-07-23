@@ -31,6 +31,7 @@ bool EvernoteBackend::isAuthenticated()
 
 void EvernoteBackend::requestAllNotes()
 {
+	Note::id_t id = 1;
 	QList<Note::Ptr> notesList;
 
 	const int NotesInChunk = 50;
@@ -56,9 +57,10 @@ void EvernoteBackend::requestAllNotes()
 						metadata.updateSequenceNum.value(-1) << ")";
 
 				auto note = std::make_shared<EvernoteNote>(shared_from_this());
+				note->setId(id++);
 				note->setGuid(metadata.guid);
 				note->setTitle(metadata.title.value("[untitled]"));
-				note->setPath("/" + notebook.guid + "/");
+				note->setPath("/" + notebook.name.value("[unknown notebook]") + "/");
 				notesList.append(note);
 			}
 			startIndex += notesMetadata.notes.length();

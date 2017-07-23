@@ -2,6 +2,7 @@
 #include "core/filelocator.h"
 #include "log.h"
 #include "core/backends/evernote/evernotebackend.h"
+#include "core/backends/common/note.h"
 #include "exceptions.h"
 
 #include <QQuickItem>
@@ -79,7 +80,8 @@ void KasanNotesApplication::authenticationCompleted()
 
 void KasanNotesApplication::registerMetatypes()
 {
-	//qRegisterMetaType<BmxpPacket::Ptr>("BmxpPacket::Ptr");
+	qRegisterMetaType<Note::Ptr>("Note::Ptr");
+	qRegisterMetaType<QList<Note::Ptr>>("QList<Note::Ptr>");
 }
 
 QPair<QString,QUrl> KasanNotesApplication::readTokenAndUrlFromFile(const QString& path)

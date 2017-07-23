@@ -29,3 +29,8 @@ QList<Note::Ptr> NoteStorage::allNotes() const
 {
 	return m_notes;
 }
+
+void NoteStorage::clear()
+{
+	m_notes.clear();
+}

@@ -8,12 +8,15 @@
 #include <QQmlComponent>
 #include <QQuickItem>
 #include <QQmlProperty>
+#include <QQmlContext>
 
 #include <QTimer>
 
 MainWindowController::MainWindowController(QObject *parent) : QObject(parent),
 	m_view(nullptr),
-	m_currentNoteEditor(nullptr)
+	m_currentNoteEditor(nullptr),
+	m_noteStorage(std::make_shared<NoteStorage>()),
+	m_noteStorageModel(m_noteStorage)
 {
 
 }
@@ -21,11 +24,14 @@ MainWindowController::MainWindowController(QObject *parent) : QObject(parent),
 void MainWindowController::setBackend(const Backend::Ptr& backend)
 {
 	m_backend = backend;
+	connect(backend.get(), SIGNAL(allNotes(QList<Note::Ptr>)), this, SLOT(allNotes(QList<Note::Ptr>)));
 }
 
 void MainWindowController::setView(QQuickView* view)
 {
 	m_view = view;
+	QQmlContext *ctxt = view->rootContext();
+	ctxt->setContextProperty("notesModel", &m_noteStorageModel);
 }
 
 void MainWindowController::forceNotesRefresh()
@@ -45,6 +51,13 @@ void MainWindowController::addButtonClicked()
 
 void MainWindowController::allNotes(const QList<Note::Ptr>& notes)
 {
+	LOG(DEBUG) << "MainWindowController: incoming notes: " << notes.size();
+	m_noteStorage->clear();
+	for(const auto& note : notes)
+	{
+		m_noteStorage->addNote(note);
+	}
 
+	m_noteStorageModel.notesChanged();
 }
 

@@ -9,7 +9,7 @@ TreeView {
 
   TableViewColumn {
   	title: ""
-  	role: "text"
+  	role: "display"
   }
   
   model: notesModel
