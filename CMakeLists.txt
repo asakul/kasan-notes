@@ -6,6 +6,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/3rdparty/cmake")
 
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty)
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/doctest)
 
 find_package(Qt5Widgets)
 find_package(Qt5Gui)
@@ -28,7 +29,14 @@ include_directories(${Boost_INCLUDE_DIRS})
 set(CMAKE_CXX_FLAGS "-g -std=gnu++14 -fPIC")
 add_definitions(-DELPP_QT_LOGGING)
 
+add_definitions(-DELPP_NO_DEFAULT_LOG_FILE=1 -DELPP_NO_CHECK_MACROS=1)
+add_definitions(-DDOCTEST_CONFIG_NO_SHORT_MACRO_NAMES=1)
+
 find_library(QEVERCLOUD qt5qevercloud PATHS /usr/local/lib)
+
+set(3rdparty-sources
+	3rdparty/easylogging/easylogging++.cc
+)
 
 set(sources
 	log.cpp
@@ -43,8 +51,12 @@ set(sources
 	core/backends/evernote/evernotebackend.cpp
 	core/backends/evernote/evernotenote.cpp
 )
-add_executable(kasan-notes main.cpp ${sources})
-target_link_libraries(kasan-notes ${Boost_LIBRARIES} -lqt5qevercloud)
 
+add_executable(kasan-notes main.cpp ${sources} ${3rdparty-sources})
+target_link_libraries(kasan-notes ${Boost_LIBRARIES} -lqt5qevercloud)
 qt5_use_modules(kasan-notes Widgets Gui Quick Qml Network)
+
+add_executable(kasan-notes-tests test.cpp ${sources} ${3rdparty-sources})
+target_link_libraries(kasan-notes-tests ${Boost_LIBRARIES} -lqt5qevercloud)
+qt5_use_modules(kasan-notes-tests Widgets Gui Quick Qml Network)
 
