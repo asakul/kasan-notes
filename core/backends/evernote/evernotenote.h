@@ -3,7 +3,7 @@
 
 #include "core/backends/common/note.h"
 
-#include "3rdparty/evernote-sdk-cpp/src/Types_types.h"
+#include "qt5qevercloud/QEverCloud.h"
 
 class EvernoteBackend;
 class EvernoteNote : public Note
@@ -22,13 +22,13 @@ public:
 	virtual void setTitle(const QString& title) override;
 	virtual QString title() const override;
 
-	virtual void setContent(const QString& content) override;
-	virtual QString content() const override;
+	virtual void setContent(const boost::optional<QString>& content) override;
+	virtual boost::optional<QString> content() const override;
 
 private:
 	std::weak_ptr<EvernoteBackend> m_backend;
 	std::string m_guid;
-	std::shared_ptr<evernote::edam::Note> m_note;
+	qevercloud::Note m_note;
 };
 
 #endif // EVERNOTENOTE_H

@@ -3,28 +3,28 @@
 
 #include "exceptions.h"
 
-static std::string convertToEnml(const QString& content)
+static QString convertToEnml(const QString& content)
 {
-	std::string result =
+	QString result =
 R"(<?xml version="1.0" encoding="UTF-8"?>""
 <!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">"
 <en-note>)";
-	result += content.toStdString();
+	result += content;
 	result += "</en-note>";
 	return result;
 }
 
-static QString convertFromEnml(const std::string& enml)
+static QString convertFromEnml(const QString& enml)
 {
-	auto ennotePos = enml.find_first_of("<en-note>");
-	auto ennoteClosePos = enml.find_last_of("</en-note>");
+	auto ennotePos = enml.indexOf("<en-note>");
+	auto ennoteClosePos = enml.lastIndexOf("</en-note>");
 
-	if((ennotePos == std::string::npos) || (ennoteClosePos == std::string::npos))
+	if((ennotePos == -1) || (ennoteClosePos == -1))
 		BOOST_THROW_EXCEPTION(FormatError() << error_message("Malformed note"));
 
 	ennotePos += strlen("<en-note>");
 
-	return QString::fromStdString(enml.substr(ennotePos, ennoteClosePos - ennotePos));
+	return enml.mid(ennotePos, ennoteClosePos - ennotePos);
 }
 
 EvernoteNote::EvernoteNote(const std::weak_ptr<EvernoteBackend>& backend) : m_backend(backend)
@@ -61,20 +61,23 @@ QString EvernoteNote::path() const
 
 void EvernoteNote::setTitle(const QString& title)
 {
-	m_note->title = title.toStdString();
+	m_note.title = title;
 }
 
 QString EvernoteNote::title() const
 {
-	return QString::fromStdString(m_note->title);
+	return m_note.title;
 }
 
-void EvernoteNote::setContent(const QString& content)
+void EvernoteNote::setContent(const boost::optional<QString>& content)
 {
-	m_note->content = convertToEnml(content);
+	if(content)
+	{
+		m_note.content = convertToEnml(content.value());
+	}
 }
 
-QString EvernoteNote::content() const
+boost::optional<QString> EvernoteNote::content() const
 {
-	return convertFromEnml(m_note->content);
+	return convertFromEnml(m_note.content.value());
 }

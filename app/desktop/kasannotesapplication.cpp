@@ -1,12 +1,13 @@
 #include "kasannotesapplication.h"
 #include "core/filelocator.h"
+#include "log.h"
+#include "core/backends/evernote/evernotebackend.h"
+#include "exceptions.h"
+
 #include <QQuickItem>
 #include <QQmlError>
 #include <QScreen>
-#include "log.h"
-#include "core/backends/evernote/evernotebackend.h"
-
-#include "exceptions.h"
+#include <QTimer>
 
 
 KasanNotesApplication::KasanNotesApplication(int& argc, char** argv) : QGuiApplication(argc, argv)
@@ -57,6 +58,8 @@ int KasanNotesApplication::run()
 	m_backend->moveToThread(m_backendThread.get());
 	m_backendThread->start();
 
+	QTimer::singleShot(0, m_backend.get(), SLOT(requestAllNotes()));
+
 	return exec();
 }
 
@@ -79,14 +82,14 @@ void KasanNotesApplication::registerMetatypes()
 	//qRegisterMetaType<BmxpPacket::Ptr>("BmxpPacket::Ptr");
 }
 
-QPair<QString,QString> KasanNotesApplication::readTokenAndUrlFromFile(const QString& path)
+QPair<QString,QUrl> KasanNotesApplication::readTokenAndUrlFromFile(const QString& path)
 {
 	QFile file(path);
 	if(!file.open(QIODevice::ReadOnly))
 		BOOST_THROW_EXCEPTION(FileNotFound() << error_message(tr("Unable to open file with token/url: %1").arg(path)));
 
-	auto token = file.readLine();
-	auto url = file.readLine();
+	auto token = QString::fromUtf8(file.readLine()).trimmed();
+	auto url = QUrl::fromUserInput(QString::fromUtf8(file.readLine()).trimmed());
 
 	return qMakePair(token, url);
 }

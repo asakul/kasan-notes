@@ -1,10 +1,11 @@
 #ifndef EVERNOTEBACKEND_H
 #define EVERNOTEBACKEND_H
 
-#include <QObject>
+#include <QtCore/QObject>
+#include <QUrl>
 #include "core/backends/common/backend.h"
 
-#include "3rdparty/evernote-sdk-cpp/src/NoteStore.h"
+#include "qt5qevercloud/QEverCloud.h"
 
 #include <memory>
 
@@ -16,16 +17,19 @@ public:
 
 	explicit EvernoteBackend();
 
-	static Ptr createFromDeveloperToken(const QString& token, const QString& url);
+	static Ptr createFromDeveloperToken(const QString& token, const QUrl& url);
 
 	virtual bool isAuthenticated() override;
 
 signals:
 
 public slots:
+	void requestAllNotes() override;
 
 private:
-	std::unique_ptr<evernote::edam::NoteStoreClient> m_client;
+	std::unique_ptr<qevercloud::NoteStore> m_client;
+	QString m_token;
+
 };
 
 #endif // EVERNOTEBACKEND_H

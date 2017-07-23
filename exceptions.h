@@ -2,7 +2,7 @@
 #define EXCEPTIONS_H_
 
 #include <exception>
-#include <QString>
+#include <QtCore/QString>
 #include <string>
 #include <boost/exception/all.hpp>
 

@@ -9,7 +9,9 @@
 #include <QQuickItem>
 #include <QQmlProperty>
 
-MainWindowController::MainWindowController(QObject *parent) : QObject(parent)
+MainWindowController::MainWindowController(QObject *parent) : QObject(parent),
+	m_view(nullptr),
+	m_currentNoteEditor(nullptr)
 {
 
 }

@@ -23,7 +23,7 @@ private slots:
 
 private:
 	void registerMetatypes();
-    QPair<QString,QString> readTokenAndUrlFromFile(const QString& path);
+    QPair<QString,QUrl> readTokenAndUrlFromFile(const QString& path);
 
 private:
 	Backend::Ptr m_backend;

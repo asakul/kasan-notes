@@ -1,6 +1,8 @@
 #ifndef CORE_BACKENDS_COMMON_BACKEND_H_
 #define CORE_BACKENDS_COMMON_BACKEND_H_
 
+#include "note.h"
+
 #include <memory>
 #include <QObject>
 
@@ -15,6 +17,10 @@ public:
 	virtual bool isAuthenticated() = 0;
 
 signals:
+	void allNotes(const QList<Note::Ptr>& notes);
+
+public slots:
+	virtual void requestAllNotes() = 0;
 };
 
 

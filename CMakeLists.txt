@@ -21,7 +21,7 @@ include_directories(${Qt5Network_INCLUDE_DIRS})
 
 set (Boost_USER_MULTITHREADED ON)
 
-find_package (Boost COMPONENTS system)
+find_package (Boost COMPONENTS filesystem system)
 add_definitions(-DBOOST_THREAD_USE_LIB)
 include_directories(${Boost_INCLUDE_DIRS})
 
@@ -30,6 +30,8 @@ add_definitions(-DELPP_QT_LOGGING)
 
 find_package(Thrift)
 include_directories(${THRIFT_INCLUDE_DIR}/thrift)
+
+find_library(QEVERCLOUD qt5qevercloud PATHS /usr/local/lib)
 
 set(sources
 	log.cpp
@@ -61,7 +63,7 @@ set(evernote-sdk-sources
 )
 
 add_executable(kasan-notes main.cpp ${sources} ${evernote-sdk-sources})
-target_link_libraries(kasan-notes ${THRIFT_LIBRARIES})
+target_link_libraries(kasan-notes ${THRIFT_LIBRARIES} ${Boost_LIBRARIES} -lqt5qevercloud)
 
 qt5_use_modules(kasan-notes Widgets Gui Quick Qml Network)
 

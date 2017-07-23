@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <memory>
 
+#include <boost/optional.hpp>
+
 class Note
 {
 public:
@@ -24,8 +26,8 @@ public:
 	virtual void setTitle(const QString& title) = 0;
 	virtual QString title() const = 0;
 
-	virtual void setContent(const QString& content) = 0;
-	virtual QString content() const = 0;
+	virtual void setContent(const boost::optional<QString>& content) = 0;
+	virtual boost::optional<QString> content() const = 0;
 };
 
 #endif // NOTE_H
