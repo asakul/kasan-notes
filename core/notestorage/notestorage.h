@@ -3,12 +3,30 @@
 
 #include "core/backends/common/note.h"
 
+#include <QObject>
+#include <QList>
 
-class NoteStorage
+#include <memory>
+
+class NoteStorage : public QObject
 {
+	Q_OBJECT
 public:
+	using Ptr = std::shared_ptr<NoteStorage>;
+
 	NoteStorage();
 	virtual ~NoteStorage();
+
+	void addNote(const Note::Ptr& note);
+	Note::Ptr getNote(const Note::id_t& id) const;
+
+	QList<Note::Ptr> allNotes() const;
+
+signals:
+	void notesChanged();
+
+private:
+	QList<Note::Ptr> m_notes;
 };
 
 #endif // NOTESTORAGE_H

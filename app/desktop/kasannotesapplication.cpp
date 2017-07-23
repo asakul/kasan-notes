@@ -58,7 +58,7 @@ int KasanNotesApplication::run()
 	m_backend->moveToThread(m_backendThread.get());
 	m_backendThread->start();
 
-	QTimer::singleShot(0, m_backend.get(), SLOT(requestAllNotes()));
+	m_mainWindowController.forceNotesRefresh();
 
 	return exec();
 }

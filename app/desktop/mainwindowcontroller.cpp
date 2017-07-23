@@ -9,6 +9,8 @@
 #include <QQuickItem>
 #include <QQmlProperty>
 
+#include <QTimer>
+
 MainWindowController::MainWindowController(QObject *parent) : QObject(parent),
 	m_view(nullptr),
 	m_currentNoteEditor(nullptr)
@@ -21,6 +23,16 @@ void MainWindowController::setBackend(const Backend::Ptr& backend)
 	m_backend = backend;
 }
 
+void MainWindowController::setView(QQuickView* view)
+{
+	m_view = view;
+}
+
+void MainWindowController::forceNotesRefresh()
+{
+	QTimer::singleShot(0, m_backend.get(), SLOT(requestAllNotes()));
+}
+
 void MainWindowController::addButtonClicked()
 {
 	auto locator = createDefaultFileLocator();
@@ -31,7 +43,8 @@ void MainWindowController::addButtonClicked()
 	QQmlEngine::setObjectOwnership(m_currentNoteEditor, QQmlEngine::CppOwnership);
 }
 
-void MainWindowController::setView(QQuickView* view)
+void MainWindowController::allNotes(const QList<Note::Ptr>& notes)
 {
-	m_view = view;
+
 }
+

@@ -9,7 +9,8 @@
 
 #include <memory>
 
-class EvernoteBackend : public Backend
+class EvernoteBackend : public Backend,
+	public std::enable_shared_from_this
 {
 	Q_OBJECT
 public:
