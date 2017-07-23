@@ -50,6 +50,7 @@ void EvernoteBackend::requestAllNotes()
 						" (" << metadata.guid << ";" <<
 						metadata.updateSequenceNum.value(-1) << ")";
 			}
+			startIndex += notesMetadata.notes.length();
 		} while(notesMetadata.startIndex + notesMetadata.notes.length() < notesMetadata.totalNotes);
 	}
 
