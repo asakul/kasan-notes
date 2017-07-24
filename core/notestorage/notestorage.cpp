@@ -1,6 +1,6 @@
 #include "notestorage.h"
 
-NoteStorage::NoteStorage()
+NoteStorage::NoteStorage() : m_rootNotebook(std::make_shared<Notebook>(0, ""))
 {
 
 }
@@ -10,27 +10,7 @@ NoteStorage::~NoteStorage()
 
 }
 
-void NoteStorage::addNote(const Note::Ptr& note)
+void NoteStorage::replaceRootNotebook(const Notebook::Ptr& notebook)
 {
-	m_notes.append(note);
-}
-
-Note::Ptr NoteStorage::getNote(const Note::id_t& id) const
-{
-	for(const auto& x : m_notes)
-	{
-		if(x->id() == id)
-			return x;
-	}
-	return nullptr;
-}
-
-QList<Note::Ptr> NoteStorage::allNotes() const
-{
-	return m_notes;
-}
-
-void NoteStorage::clear()
-{
-	m_notes.clear();
+	m_rootNotebook = notebook;
 }

@@ -3,6 +3,7 @@
 #include "log.h"
 #include "core/backends/evernote/evernotebackend.h"
 #include "core/backends/common/note.h"
+#include "core/backends/common/notebook.h"
 #include "exceptions.h"
 
 #include <QQuickItem>
@@ -80,6 +81,7 @@ void KasanNotesApplication::authenticationCompleted()
 
 void KasanNotesApplication::registerMetatypes()
 {
+	qRegisterMetaType<Notebook::Ptr>("Notebook::Ptr");
 	qRegisterMetaType<Note::Ptr>("Note::Ptr");
 	qRegisterMetaType<QList<Note::Ptr>>("QList<Note::Ptr>");
 }

@@ -6,8 +6,6 @@
 
 #include "doctest/doctest.h"
 
-#include "test/stubs/stubnote.h"
-
 Notebook::Notebook(const id_t& id, const QString& backendId) : m_id(id), m_backendId(backendId)
 {
 }
@@ -76,6 +74,22 @@ void Notebook::removeNote(const Note::Ptr& note)
 	}
 }
 
+void Notebook::addNotebook(const Notebook::Ptr& notebook)
+{
+	m_notebooks.append(notebook);
+}
+
+size_t Notebook::notebooksCount() const
+{
+	return m_notebooks.size();
+}
+
+Notebook::Ptr Notebook::notebookByIndex(size_t index) const
+{
+	return m_notebooks[index];
+}
+
+
 TEST_CASE("Notebook basic functionality")
 {
 	Notebook notebook(1, "foo_backend");
@@ -106,8 +120,8 @@ TEST_CASE("Notebook basic functionality")
 
 	SUBCASE("Notes manipulation")
 	{
-		auto note1 = std::make_shared<StubNote>(1, "foo_backend");
-		auto note2 = std::make_shared<StubNote>(2, "foo_backend");
+		auto note1 = std::make_shared<Note>(1, "foo_backend");
+		auto note2 = std::make_shared<Note>(2, "foo_backend");
 
 		SUBCASE("No notes by default")
 		{
@@ -137,4 +151,3 @@ TEST_CASE("Notebook basic functionality")
 		}
 	}
 }
-

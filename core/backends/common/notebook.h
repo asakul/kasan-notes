@@ -35,11 +35,17 @@ public:
 	virtual Note::Ptr noteById(const Note::id_t& id) const;
 	virtual void removeNote(const Note::Ptr& note);
 
+	virtual void addNotebook(const Notebook::Ptr& notebook);
+	virtual size_t notebooksCount() const;
+	virtual Notebook::Ptr notebookByIndex(size_t index) const;
+
+
 private:
 	id_t m_id;
 	QString m_backendId;
 
 	QString m_title;
+	QList<Notebook::Ptr> m_notebooks;
 	QList<Note::Ptr> m_notes;
 };
 

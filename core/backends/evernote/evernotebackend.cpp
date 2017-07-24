@@ -6,6 +6,7 @@
 #include <boost/filesystem.hpp>
 
 #include "core/backends/common/note.h"
+#include "core/backends/common/notebook.h"
 #include "core/backends/evernote/evernotenote.h"
 
 #include <QList>
@@ -31,13 +32,15 @@ bool EvernoteBackend::isAuthenticated()
 
 void EvernoteBackend::requestAllNotes()
 {
-	Note::id_t id = 1;
+	Note::id_t noteId = 1;
+	Notebook::id_t notebookId = 1;
 	QList<Note::Ptr> notesList;
 
 	const int NotesInChunk = 50;
 
 	LOG(DEBUG) << "EvernoteBackend: requesting all notebooks";
 	auto notebooks = m_client->listNotebooks();
+	auto root = std::make_shared<Notebook>(0, "evernote");
 	for(const auto& notebook : notebooks)
 	{
 		LOG(DEBUG) << "Obtained notebook: " << notebook.name.value("[unset]") << " (" << notebook.guid.value("[unset]") << ")";
@@ -47,6 +50,10 @@ void EvernoteBackend::requestAllNotes()
 		resultSpec.includeTitle = true;
 		resultSpec.includeUpdateSequenceNum = true;
 		int startIndex = 0;
+
+		auto evernoteNotebook = std::make_shared<Notebook>(notebookId, "evernote");
+		evernoteNotebook->setTitle(notebook.name.value("[unset]"));
+		root->addNotebook(evernoteNotebook);
 		auto notesMetadata = m_client->findNotesMetadata(filter, startIndex, NotesInChunk, resultSpec);
 		do
 		{
@@ -56,16 +63,14 @@ void EvernoteBackend::requestAllNotes()
 						" (" << metadata.guid << ";" <<
 						metadata.updateSequenceNum.value(-1) << ")";
 
-				auto note = std::make_shared<EvernoteNote>(shared_from_this());
-				note->setId(id++);
+				auto note = std::make_shared<EvernoteNote>(noteId, shared_from_this());
 				note->setGuid(metadata.guid);
 				note->setTitle(metadata.title.value("[untitled]"));
-				note->setPath("/" + notebook.name.value("[unknown notebook]") + "/");
-				notesList.append(note);
+				evernoteNotebook->addNote(note);
 			}
 			startIndex += notesMetadata.notes.length();
 		} while(notesMetadata.startIndex + notesMetadata.notes.length() < notesMetadata.totalNotes);
 	}
 
-	emit allNotes(notesList);
+	emit allNotes(root);
 }

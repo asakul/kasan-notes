@@ -2,6 +2,7 @@
 #define NOTESTORAGE_H
 
 #include "core/backends/common/note.h"
+#include "core/backends/common/notebook.h"
 
 #include <QObject>
 #include <QList>
@@ -17,17 +18,14 @@ public:
 	NoteStorage();
 	virtual ~NoteStorage();
 
-	void addNote(const Note::Ptr& note);
-	Note::Ptr getNote(const Note::id_t& id) const;
-	void clear();
-
-	QList<Note::Ptr> allNotes() const;
+	void replaceRootNotebook(const Notebook::Ptr& notebook);
+	Notebook::Ptr rootNotebook() const { return m_rootNotebook; }
 
 signals:
 	void notesChanged();
 
 private:
-	QList<Note::Ptr> m_notes;
+	Notebook::Ptr m_rootNotebook;
 };
 
 #endif // NOTESTORAGE_H

@@ -20,21 +20,21 @@ NoteStorageModel::~NoteStorageModel()
 QModelIndex NoteStorageModel::index(int row, int column,
 		const QModelIndex& parent) const
 {
-	Category* parentCat = static_cast<Category*>(parent.internalPointer());
-	if(parentCat == nullptr)
+	Notebook* parentNotebook = static_cast<Notebook*>(parent.internalPointer());
+	if(parentNotebook == nullptr)
 	{
-		return createIndex(row, column, const_cast<Category*>(&m_rootCategory));
+		return createIndex(row, column, const_cast<Notebook*>(m_noteStorage->rootNotebook().get()));
 	}
 	else
 	{
-		if(parentCat->subcategories.size() > parent.row())
+		if(parent.row() < parentNotebook->notebooksCount())
 		{
-			parentCat = &parentCat->subcategories[parent.row()];
-			return createIndex(row, column, const_cast<Category*>(parentCat));
+			parentNotebook = parentNotebook->notebookByIndex(parent.row()).get();
+			return createIndex(row, column, const_cast<Notebook*>(parentNotebook));
 		}
 		else
 		{
-			return createIndex(row, column, const_cast<Category*>(&m_rootCategory));
+			return createIndex(-1, -1, nullptr);
 		}
 	}
 }
@@ -50,18 +50,18 @@ int NoteStorageModel::rowCount(const QModelIndex& parent) const
 	if(row < 0)
 		row = 0;
 
-	Category* parentCat = static_cast<Category*>(parent.internalPointer());
-	if(parentCat == nullptr)
+	Notebook* parentNotebook = static_cast<Notebook*>(parent.internalPointer());
+	if(parentNotebook == nullptr)
 	{
-		return m_rootCategory.notes.size() + m_rootCategory.subcategories.size();
+		return m_noteStorage->rootNotebook()->notebooksCount() + m_noteStorage->rootNotebook()->notesCount();
 	}
 
-	if(parentCat->subcategories.size() <= row)
+	if(row >= parentNotebook->notebooksCount())
 		return 0;
 
-	parentCat = &parentCat->subcategories[row];
+	parentNotebook = parentNotebook->notebookByIndex(row).get();
 
-	return parentCat->notes.size() + parentCat->subcategories.size();
+	return parentNotebook->notebooksCount() + parentNotebook->notesCount();
 }
 
 int NoteStorageModel::columnCount(const QModelIndex& parent) const
@@ -74,21 +74,21 @@ QVariant NoteStorageModel::data(const QModelIndex& index, int role) const
 	if(role != Qt::DisplayRole)
 		return QVariant();
 
-	auto parentCat = static_cast<Category*>(index.internalPointer());
-	if(!parentCat)
+	auto parentNotebook = static_cast<Notebook*>(index.internalPointer());
+	if(!parentNotebook)
 		return QVariant();
 
-	if(index.row() < parentCat->subcategories.size())
+	if(index.row() < parentNotebook->notebooksCount())
 	{
-		return parentCat->subcategories.at(index.row()).name;
+		return parentNotebook->notebookByIndex(index.row())->title();
 	}
 	else
 	{
-		int itemIndex = index.row() - parentCat->subcategories.size();
-		if(itemIndex >= parentCat->notes.size())
+		int itemIndex = index.row() - parentNotebook->notebooksCount();
+		if(itemIndex >= parentNotebook->notesCount())
 			return QVariant();
 
-		auto note = m_noteStorage->getNote(parentCat->notes.at(itemIndex));
+		auto note = parentNotebook->noteByIndex(itemIndex);
 		if(!note)
 			return QVariant();
 
@@ -99,18 +99,6 @@ QVariant NoteStorageModel::data(const QModelIndex& index, int role) const
 void NoteStorageModel::notesChanged()
 {
 	beginResetModel();
-	m_rootCategory.notes.clear();
-	m_rootCategory.subcategories.clear();
-
-	auto allNotes = m_noteStorage->allNotes();
-	for(const auto& note : allNotes)
-	{
-		auto path = note->path();
-		auto& category = m_rootCategory.getByPath(path);
-		category.notes.append(note->id());
-		LOG(DEBUG) << "Note: " << note->title() << ": " << note->id();
-	}
-
 	endResetModel();
 }
 
@@ -126,47 +114,49 @@ DOCTEST_TEST_CASE("NoteStorageModel builds correct tree")
 
 	SUBCASE("One note in the root")
 	{
-		auto note = std::make_shared<StubNote>(1, "foo");
-		note->setPath("/");
+		auto note = std::make_shared<Note>(1, "foo");
 		note->setTitle("Foo");
-		storage->addNote(note);
+		storage->rootNotebook()->addNote(note);
 		model.notesChanged();
 
 		REQUIRE(model.rowCount() == 1);
 		REQUIRE(model.data(model.index(0, 0), Qt::DisplayRole).toString() == "Foo");
 	}
 
-	SUBCASE("One note in the root, one in subcategory")
+	SUBCASE("One note in the root, one in subnotebook")
 	{
-		auto note1 = std::make_shared<StubNote>(1, "foo");
-		note1->setPath("/");
+		auto note1 = std::make_shared<Note>(1, "foo");
 		note1->setTitle("Root note");
-		storage->addNote(note1);
+		storage->rootNotebook()->addNote(note1);
 
-		auto note2 = std::make_shared<StubNote>(2, "foo");
-		note2->setPath("/category");
-		note2->setTitle("Note in category");
-		storage->addNote(note2);
+		auto notebook = std::make_shared<Notebook>(1, "foo");
+		notebook->setTitle("category");
+		storage->rootNotebook()->addNotebook(notebook);
+		auto note2 = std::make_shared<Note>(2, "foo");
+		note2->setTitle("Note in notebook");
+		notebook->addNote(note2);
 
 		model.notesChanged();
 
 		REQUIRE(model.rowCount() == 2);
 		REQUIRE(model.data(model.index(0, 0), Qt::DisplayRole).toString() == "category");
 		REQUIRE(model.data(model.index(1, 0), Qt::DisplayRole).toString() == "Root note");
-		REQUIRE(model.data(model.index(0, 0, model.index(0, 0)), Qt::DisplayRole).toString() == "Note in category");
+		REQUIRE(model.data(model.index(0, 0, model.index(0, 0)), Qt::DisplayRole).toString() == "Note in notebook");
 	}
 
-	SUBCASE("Two notes in subcategory")
+	SUBCASE("Two notes in subnotebook")
 	{
-		auto note1 = std::make_shared<StubNote>(1, "foo");
-		note1->setPath("/category");
-		note1->setTitle("Note1");
-		storage->addNote(note1);
+		auto notebook = std::make_shared<Notebook>(1, "foo");
+		notebook->setTitle("category");
+		storage->rootNotebook()->addNotebook(notebook);
 
-		auto note2 = std::make_shared<StubNote>(2, "foo");
-		note2->setPath("/category");
+		auto note1 = std::make_shared<Note>(1, "foo");
+		note1->setTitle("Note1");
+		notebook->addNote(note1);
+
+		auto note2 = std::make_shared<Note>(2, "foo");
 		note2->setTitle("Note2");
-		storage->addNote(note2);
+		notebook->addNote(note2);
 
 		model.notesChanged();
 

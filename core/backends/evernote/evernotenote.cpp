@@ -27,7 +27,7 @@ static QString convertFromEnml(const QString& enml)
 	return enml.mid(ennotePos, ennoteClosePos - ennotePos);
 }
 
-EvernoteNote::EvernoteNote(const std::weak_ptr<EvernoteBackend>& backend) : m_id(0), m_backend(backend)
+EvernoteNote::EvernoteNote(const id_t& id, const std::weak_ptr<EvernoteBackend>& backend) : Note(id, "evernote"), m_backend(backend)
 {
 
 }
@@ -35,41 +35,6 @@ EvernoteNote::EvernoteNote(const std::weak_ptr<EvernoteBackend>& backend) : m_id
 EvernoteNote::~EvernoteNote()
 {
 
-}
-
-void EvernoteNote::setId(const id_t& id)
-{
-	m_id = id;
-}
-
-Note::id_t EvernoteNote::id() const
-{
-	return m_id;
-}
-
-QString EvernoteNote::backendId() const
-{
-	return "evernote";
-}
-
-void EvernoteNote::setPath(const QString& path)
-{
-	m_path = path;
-}
-
-QString EvernoteNote::path() const
-{
-	return m_path;
-}
-
-void EvernoteNote::setTitle(const QString& title)
-{
-	m_note.title = title;
-}
-
-QString EvernoteNote::title() const
-{
-	return m_note.title;
 }
 
 void EvernoteNote::setContent(const boost::optional<QString>& content)

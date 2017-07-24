@@ -56,9 +56,6 @@ set(sources
 	core/notestorage/notestoragemodel.cpp
 )
 
-set(test_sources
-	test/stubs/stubnote.cpp)
-
 add_executable(kasan-notes main.cpp ${sources} ${3rdparty-sources} ${test_sources})
 target_link_libraries(kasan-notes ${Boost_LIBRARIES} -lqt5qevercloud)
 qt5_use_modules(kasan-notes Widgets Gui Quick Qml Network)

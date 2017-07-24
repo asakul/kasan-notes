@@ -2,6 +2,7 @@
 #define CORE_BACKENDS_COMMON_BACKEND_H_
 
 #include "note.h"
+#include "notebook.h"
 
 #include <memory>
 #include <QObject>
@@ -17,7 +18,7 @@ public:
 	virtual bool isAuthenticated() = 0;
 
 signals:
-	void allNotes(const QList<Note::Ptr>& notes);
+	void allNotes(const Notebook::Ptr& root);
 
 public slots:
 	virtual void requestAllNotes() = 0;

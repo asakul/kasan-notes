@@ -27,7 +27,7 @@ signals:
 
 public slots:
 	void addButtonClicked();
-	void allNotes(const QList<Note::Ptr>& notes);
+	void allNotes(const Notebook::Ptr& root);
 
 private:
 	Backend::Ptr m_backend;

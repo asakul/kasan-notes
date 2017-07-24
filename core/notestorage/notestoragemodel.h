@@ -28,37 +28,6 @@ public slots:
 
 private:
 	NoteStorage::Ptr m_noteStorage;
-
-	struct Category
-	{
-		QString name;
-		QList<Category> subcategories;
-		QList<Note::id_t> notes;
-
-		Category& getByPath(QString path)
-		{
-			if(path.startsWith('/'))
-				path = path.right(path.size() - 1);
-
-			if(path.isEmpty())
-				return *this;
-
-			auto thisName = path.section('/', 0, 0);
-			auto rest = path.section('/', 1);
-			for(auto& cat : subcategories)
-			{
-				if(cat.name == thisName)
-					return cat.getByPath(rest);
-			}
-
-			Category newcat;
-			newcat.name = thisName;
-			subcategories.append(newcat);
-			return subcategories.back().getByPath(rest);
-		}
-	};
-
-	Category m_rootCategory;
 };
 
 #endif /* CORE_NOTESTORAGE_NOTESTORAGEMODEL_H_ */

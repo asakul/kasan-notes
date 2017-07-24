@@ -49,14 +49,10 @@ void MainWindowController::addButtonClicked()
 	QQmlEngine::setObjectOwnership(m_currentNoteEditor, QQmlEngine::CppOwnership);
 }
 
-void MainWindowController::allNotes(const QList<Note::Ptr>& notes)
+void MainWindowController::allNotes(const Notebook::Ptr& root)
 {
-	LOG(DEBUG) << "MainWindowController: incoming notes: " << notes.size();
-	m_noteStorage->clear();
-	for(const auto& note : notes)
-	{
-		m_noteStorage->addNote(note);
-	}
+	LOG(DEBUG) << "MainWindowController: incoming notes";
+	m_noteStorage->replaceRootNotebook(root);
 
 	m_noteStorageModel.notesChanged();
 }
