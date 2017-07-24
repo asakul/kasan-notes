@@ -1,13 +1,16 @@
 #ifndef NOTE_H
 #define NOTE_H
 
-#include <QString>
+#include "attachment.h"
 
 #include <cstdint>
 #include <memory>
 
 #include <boost/optional.hpp>
+
+#include <QString>
 #include <QMetaType>
+#include <QMap>
 
 class Note
 {
@@ -27,6 +30,9 @@ public:
 	virtual void setContent(const boost::optional<QString>& content);
 	virtual boost::optional<QString> content() const;
 
+	virtual void addAttachment(const Attachment::Ptr& attachment);
+	virtual Attachment::Ptr attachmentByHash(const QByteArray& hash) const;
+
 private:
 	id_t m_id;
 	QString m_backendId;
@@ -34,6 +40,8 @@ private:
 	QString m_path;
 	QString m_title;
 	boost::optional<QString> m_content;
+
+	QMap<QByteArray, Attachment::Ptr> m_attachments;
 };
 
 Q_DECLARE_METATYPE(Note::Ptr);

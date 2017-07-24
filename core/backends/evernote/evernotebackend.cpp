@@ -84,7 +84,16 @@ void EvernoteBackend::requestNoteContent(const Note::Ptr& note)
 		return;
 	}
 	LOG(DEBUG) << "EvernoteBackend: requesting note: " << note->id();
-	auto rawNote = m_client->getNote(evernoteNote->guid(), true, false, false, false);
+	auto rawNote = m_client->getNote(evernoteNote->guid(), true, true, false, false);
+	if(rawNote.resources.isSet())
+	{
+		for(const auto& resource : rawNote.resources.ref())
+		{
+			auto attachment = std::make_shared<Attachment>(resource.mime.value("unknown"), resource.data.ref().body.value(QByteArray()));
+			evernoteNote->addAttachment(attachment);
+			LOG(DEBUG) << "Added attachment: mime: " << attachment->mimeType() << "; hash: " << QString::fromUtf8(attachment->hash().toHex());
+		}
+	}
 	evernoteNote->setEnml(rawNote.content.value(""));
 	emit noteUpdated(note);
 }

@@ -45,6 +45,7 @@ set(sources
 	app/desktop/desktopfilelocator.cpp
 	app/desktop/mainwindowcontroller.cpp
 	
+	core/backends/common/attachment.cpp
 	core/backends/common/backend.cpp
 	core/backends/common/note.cpp
 	core/backends/common/notebook.cpp

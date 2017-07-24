@@ -39,3 +39,16 @@ boost::optional<QString> Note::content() const
 {
 	return m_content;
 }
+
+void Note::addAttachment(const Attachment::Ptr& attachment)
+{
+	m_attachments[attachment->hash()] = attachment;
+}
+
+Attachment::Ptr Note::attachmentByHash(const QByteArray& hash) const
+{
+	auto it = m_attachments.find(hash);
+	if(it != m_attachments.end())
+		return it.value();
+	return Attachment::Ptr();
+}
