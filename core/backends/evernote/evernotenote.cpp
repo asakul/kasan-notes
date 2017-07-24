@@ -4,6 +4,8 @@
 #include "exceptions.h"
 #include "log.h"
 
+#include <QDomDocument>
+
 static QString convertToEnml(const QString& content)
 {
 	QString result =
@@ -17,15 +19,26 @@ R"(<?xml version="1.0" encoding="UTF-8"?>""
 
 static QString convertFromEnml(const QString& enml)
 {
-	auto ennotePos = enml.indexOf("<en-note>");
-	auto ennoteClosePos = enml.lastIndexOf("</en-note>");
+	QDomDocument doc;
+	doc.setContent(enml);
 
-	if((ennotePos == -1) || (ennoteClosePos == -1))
-		BOOST_THROW_EXCEPTION(FormatError() << error_message("Malformed note"));
+	auto ennote = doc.elementsByTagName("en-note").at(0).toElement();
+	if(ennote.isNull())
+		return QString();
 
-	ennotePos += strlen("<en-note>");
+	auto mediaTags = ennote.elementsByTagName("en-media");
+	for(int i = 0; i < mediaTags.size(); i++)
+	{
+		auto mediaTag = mediaTags.at(i).toElement();
 
-	return enml.mid(ennotePos, ennoteClosePos - ennotePos);
+		if(mediaTag.attribute("type").startsWith("image/"))
+		{
+			mediaTag.setTagName("img");
+			mediaTag.setAttribute("src", "attachment://" + mediaTag.attribute("hash"));
+		}
+	}
+
+	return doc.toString();
 }
 
 EvernoteNote::EvernoteNote(const id_t& id, const std::weak_ptr<EvernoteBackend>& backend) : Note(id, "evernote"), m_backend(backend)

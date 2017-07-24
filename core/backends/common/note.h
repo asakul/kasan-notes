@@ -32,6 +32,8 @@ public:
 
 	virtual void addAttachment(const Attachment::Ptr& attachment);
 	virtual Attachment::Ptr attachmentByHash(const QByteArray& hash) const;
+	virtual Attachment::Ptr attachmentByIndex(size_t index) const;
+	virtual size_t attachmentsCount() const;
 
 private:
 	id_t m_id;

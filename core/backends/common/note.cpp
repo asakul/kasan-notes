@@ -52,3 +52,13 @@ Attachment::Ptr Note::attachmentByHash(const QByteArray& hash) const
 		return it.value();
 	return Attachment::Ptr();
 }
+
+Attachment::Ptr Note::attachmentByIndex(size_t index) const
+{
+	return m_attachments.values()[index];
+}
+
+size_t Note::attachmentsCount() const
+{
+	return m_attachments.size();
+}

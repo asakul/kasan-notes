@@ -13,12 +13,14 @@ find_package(Qt5Gui)
 find_package(Qt5Quick)
 find_package(Qt5Qml)
 find_package(Qt5Network)
+find_package(Qt5Xml)
 
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Gui_INCLUDE_DIRS})
 include_directories(${Qt5Quick_INCLUDE_DIRS})
 include_directories(${Qt5Qml_INCLUDE_DIRS})
 include_directories(${Qt5Network_INCLUDE_DIRS})
+include_directories(${Qt5Xml_INCLUDE_DIRS})
 
 set (Boost_USER_MULTITHREADED ON)
 
@@ -59,9 +61,9 @@ set(sources
 
 add_executable(kasan-notes main.cpp ${sources} ${3rdparty-sources} ${test_sources})
 target_link_libraries(kasan-notes ${Boost_LIBRARIES} -lqt5qevercloud)
-qt5_use_modules(kasan-notes Widgets Gui Quick Qml Network)
+qt5_use_modules(kasan-notes Widgets Gui Quick Qml Network Xml)
 
 add_executable(kasan-notes-tests test.cpp ${sources} ${3rdparty-sources} ${test_sources})
 target_link_libraries(kasan-notes-tests ${Boost_LIBRARIES} -lqt5qevercloud)
-qt5_use_modules(kasan-notes-tests Widgets Gui Quick Qml Network)
+qt5_use_modules(kasan-notes-tests Widgets Gui Quick Qml Network Xml)
 

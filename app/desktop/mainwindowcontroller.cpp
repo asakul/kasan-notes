@@ -10,6 +10,7 @@
 #include <QQuickItem>
 #include <QQmlProperty>
 #include <QQmlContext>
+#include <QQuickTextDocument>
 
 #include <QTimer>
 
@@ -109,6 +110,25 @@ void MainWindowController::setNoteAsCurrent(const Note::Ptr& note)
 	auto noteArea = m_view->rootObject()->findChild<QObject*>("NoteArea");
 	QQmlProperty::write(m_currentNoteEditor, "parent", QVariant::fromValue<QObject*>(noteArea));
 	QQmlEngine::setObjectOwnership(m_currentNoteEditor, QQmlEngine::CppOwnership);
+
+	QVariant qmltextdoc;
+	QMetaObject::invokeMethod(m_currentNoteEditor, "getTextDocument", Q_RETURN_ARG(QVariant, qmltextdoc));
+
+
 	LOG(DEBUG) << "Content: " << note->content().value_or("");
 	QMetaObject::invokeMethod(m_currentNoteEditor, "setText", Q_ARG(QVariant, note->content().value_or("")));
+
+	QTextDocument* doc = qmltextdoc.value<QQuickTextDocument*>()->textDocument();
+	for(int i = 0; i < note->attachmentsCount(); i++)
+	{
+		auto attachment = note->attachmentByIndex(i);
+		if(attachment->mimeType().startsWith("image/"))
+		{
+			QImage img;
+			img.loadFromData(attachment->data());
+			QUrl url("attachment://" + QString::fromUtf8(attachment->hash().toHex()));
+			LOG(DEBUG) << "Url: " << url.toString();
+			doc->addResource(QTextDocument::ImageResource, url, img);
+		}
+	}
 }

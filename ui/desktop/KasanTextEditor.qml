@@ -13,4 +13,8 @@ Rectangle {
 	function setText(text) {
 		textEdit.text = text
 	}
+	
+	function getTextDocument() {
+		return textEdit.textDocument
+	}
 }
