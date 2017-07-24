@@ -74,3 +74,17 @@ void EvernoteBackend::requestAllNotes()
 
 	emit allNotes(root);
 }
+
+void EvernoteBackend::requestNoteContent(const Note::Ptr& note)
+{
+	auto evernoteNote = std::dynamic_pointer_cast<EvernoteNote>(note);
+	if(!evernoteNote)
+	{
+		LOG(WARNING) << "Invalid note requested from EvernoteBackend: id=" << note->id() << ", backendId=" << note->backendId();
+		return;
+	}
+	LOG(DEBUG) << "EvernoteBackend: requesting note: " << note->id();
+	auto rawNote = m_client->getNote(evernoteNote->guid(), true, false, false, false);
+	evernoteNote->setEnml(rawNote.content.value(""));
+	emit noteUpdated(note);
+}

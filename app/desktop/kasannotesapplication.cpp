@@ -54,6 +54,7 @@ int KasanNotesApplication::run()
 	if(m_backend->isAuthenticated())
 	{
 		authenticationCompleted();
+		m_mainWindowController.authenticationSuccessful();
 	}
 
 	m_backendThread = std::unique_ptr<QThread>(new QThread);

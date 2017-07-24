@@ -71,29 +71,61 @@ int NoteStorageModel::columnCount(const QModelIndex& parent) const
 
 QVariant NoteStorageModel::data(const QModelIndex& index, int role) const
 {
-	if(role != Qt::DisplayRole)
-		return QVariant();
-
-	auto parentNotebook = static_cast<Notebook*>(index.internalPointer());
-	if(!parentNotebook)
-		return QVariant();
-
-	if(index.row() < parentNotebook->notebooksCount())
+	if(role == Qt::DisplayRole)
 	{
-		return parentNotebook->notebookByIndex(index.row())->title();
+		auto parentNotebook = static_cast<Notebook*>(index.internalPointer());
+		if(!parentNotebook)
+			return QVariant();
+
+		if(index.row() < parentNotebook->notebooksCount())
+		{
+			return parentNotebook->notebookByIndex(index.row())->title();
+		}
+		else
+		{
+			int itemIndex = index.row() - parentNotebook->notebooksCount();
+			if(itemIndex >= parentNotebook->notesCount())
+				return QVariant();
+
+			auto note = parentNotebook->noteByIndex(itemIndex);
+			if(!note)
+				return QVariant();
+
+			return note->title();
+		}
+	}
+	else if(role == NoteRole)
+	{
+		auto parentNotebook = static_cast<Notebook*>(index.internalPointer());
+		if(!parentNotebook)
+			return QVariant();
+
+		if(index.row() < parentNotebook->notebooksCount())
+		{
+			return QVariant();
+		}
+		else
+		{
+			int itemIndex = index.row() - parentNotebook->notebooksCount();
+			if(itemIndex >= parentNotebook->notesCount())
+				return QVariant();
+
+			auto note = parentNotebook->noteByIndex(itemIndex);
+			if(!note)
+				return QVariant();
+
+			return QVariant::fromValue(note);
+		}
 	}
 	else
 	{
-		int itemIndex = index.row() - parentNotebook->notebooksCount();
-		if(itemIndex >= parentNotebook->notesCount())
-			return QVariant();
-
-		auto note = parentNotebook->noteByIndex(itemIndex);
-		if(!note)
-			return QVariant();
-
-		return note->title();
+		return QVariant();
 	}
+}
+
+QHash<int, QByteArray> NoteStorageModel::roleNames() const
+{
+	return QHash<int, QByteArray> {{Qt::DisplayRole, "display"}, {NoteRole, "note_object"}};
 }
 
 void NoteStorageModel::notesChanged()
@@ -102,7 +134,7 @@ void NoteStorageModel::notesChanged()
 	endResetModel();
 }
 
-DOCTEST_TEST_CASE("NoteStorageModel builds correct tree")
+TEST_CASE("NoteStorageModel builds correct tree")
 {
 	auto storage = std::make_shared<NoteStorage>();
 	NoteStorageModel model(storage);
@@ -166,5 +198,30 @@ DOCTEST_TEST_CASE("NoteStorageModel builds correct tree")
 		REQUIRE(model.data(model.index(0, 0), Qt::DisplayRole).toString() == "category");
 		REQUIRE(model.data(model.index(0, 0, model.index(0, 0)), Qt::DisplayRole).toString() == "Note1");
 		REQUIRE(model.data(model.index(1, 0, model.index(0, 0)), Qt::DisplayRole).toString() == "Note2");
+	}
+}
+
+TEST_CASE("NoteStorageModel: custom data role - NoteRole")
+{
+	auto storage = std::make_shared<NoteStorage>();
+	NoteStorageModel model(storage);
+
+	auto notebook = std::make_shared<Notebook>(1, "foo");
+	notebook->setTitle("category");
+	storage->rootNotebook()->addNotebook(notebook);
+
+	auto note1 = std::make_shared<Note>(1, "foo");
+	note1->setTitle("Note1");
+	notebook->addNote(note1);
+
+	auto note2 = std::make_shared<Note>(2, "foo");
+	note2->setTitle("Note2");
+	notebook->addNote(note2);
+
+	model.notesChanged();
+
+	SUBCASE("If index corresponds to a Note, return this note")
+	{
+		REQUIRE(model.data(model.index(0, 0, model.index(0, 0)), NoteStorageModel::NoteRole).value<Note::Ptr>() == note1);
 	}
 }

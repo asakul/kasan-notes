@@ -2,6 +2,7 @@
 #include "core/backends/evernote/evernotebackend.h"
 
 #include "exceptions.h"
+#include "log.h"
 
 static QString convertToEnml(const QString& content)
 {
@@ -37,6 +38,11 @@ EvernoteNote::~EvernoteNote()
 
 }
 
+void EvernoteNote::setEnml(const QString& enml)
+{
+	m_note.content = enml;
+}
+
 void EvernoteNote::setContent(const boost::optional<QString>& content)
 {
 	if(content)
@@ -47,5 +53,8 @@ void EvernoteNote::setContent(const boost::optional<QString>& content)
 
 boost::optional<QString> EvernoteNote::content() const
 {
-	return convertFromEnml(m_note.content.value());
+	if(m_note.content.isSet())
+		return convertFromEnml(m_note.content.value());
+	else
+		return boost::optional<QString>();
 }

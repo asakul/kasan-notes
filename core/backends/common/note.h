@@ -7,6 +7,7 @@
 #include <memory>
 
 #include <boost/optional.hpp>
+#include <QMetaType>
 
 class Note
 {
@@ -34,5 +35,7 @@ private:
 	QString m_title;
 	boost::optional<QString> m_content;
 };
+
+Q_DECLARE_METATYPE(Note::Ptr);
 
 #endif // NOTE_H

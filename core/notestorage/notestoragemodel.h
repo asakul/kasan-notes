@@ -12,6 +12,11 @@
 class NoteStorageModel : public QAbstractItemModel
 {
 public:
+	enum
+	{
+		NoteRole = Qt::UserRole + 1
+	};
+
 	NoteStorageModel(const NoteStorage::Ptr& noteStorage);
 	virtual ~NoteStorageModel();
 
@@ -22,6 +27,7 @@ public:
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 	virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+	virtual QHash<int, QByteArray> roleNames() const;
 
 public slots:
 	void notesChanged();

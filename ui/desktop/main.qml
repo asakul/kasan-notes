@@ -37,6 +37,7 @@ Rectangle {
 
 					NotesTree {
 						id: notes
+						objectName: "notes"
 						anchors.fill: parent
 					}
 				}

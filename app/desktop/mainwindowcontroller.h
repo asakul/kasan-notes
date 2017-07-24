@@ -24,10 +24,18 @@ public:
 	void forceNotesRefresh();
 
 signals:
+	void requestNoteContent(const Note::Ptr& note);
 
 public slots:
+	void authenticationSuccessful();
 	void addButtonClicked();
+	void notelistClicked(const QVariant& index);
+
 	void allNotes(const Notebook::Ptr& root);
+	void noteUpdated(const Note::Ptr& note);
+
+private:
+	void setNoteAsCurrent(const Note::Ptr& note);
 
 private:
 	Backend::Ptr m_backend;

@@ -13,6 +13,7 @@ public:
 
 	virtual ~EvernoteNote();
 
+	virtual void setEnml(const QString& enml);
 	virtual void setContent(const boost::optional<QString>& content) override;
 	virtual boost::optional<QString> content() const override;
 
