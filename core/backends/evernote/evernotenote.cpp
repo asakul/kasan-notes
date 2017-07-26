@@ -7,21 +7,6 @@
 #include <QDomDocument>
 #include <QDomImplementation>
 
-static QString convertToEnml(const QString& content)
-{
-	QDomDocument doc;
-	doc.setContent(content);
-
-	auto body = doc.elementsByTagName("body").at(0);
-
-	QDomDocument newDoc(doc.implementation().createDocumentType("en-note", QString(), "http://xml.evernote.com/pub/enml2.dtd"));
-	auto newbody = newDoc.importNode(body, true).toElement();
-	newDoc.appendChild(newbody);
-	newbody.setTagName("en-note");
-
-	return newDoc.toString();
-}
-
 static QString convertFromEnml(const QString& enml)
 {
 	QDomDocument doc;
@@ -70,7 +55,7 @@ void EvernoteNote::setContent(const boost::optional<QString>& content)
 {
 	if(content)
 	{
-		auto newContent =  convertToEnml(content.value());
+		auto newContent = convertToEnml(content.value());
 		m_note.content = newContent;
 	}
 }
@@ -82,3 +67,39 @@ boost::optional<QString> EvernoteNote::content() const
 	else
 		return boost::optional<QString>();
 }
+
+QString EvernoteNote::convertToEnml(const QString& content)
+{
+	QDomDocument doc;
+	doc.setContent(content);
+
+	auto body = doc.elementsByTagName("body").at(0);
+
+	QDomDocument newDoc(doc.implementation().createDocumentType("en-note", QString(), "http://xml.evernote.com/pub/enml2.dtd"));
+	auto newbody = newDoc.importNode(body, true).toElement();
+	newDoc.appendChild(newbody);
+	newbody.setTagName("en-note");
+	auto mediaTags = newbody.elementsByTagName("img");
+	for(int i = 0; i < mediaTags.size(); i++)
+	{
+		auto mediaTag = mediaTags.at(i).toElement();
+		auto src = mediaTag.attribute("src");
+		if(src.startsWith("attachment://"))
+		{
+			auto hash = src.mid(strlen("attachment://"));
+			mediaTag.setAttribute("hash", hash);
+			mediaTag.removeAttribute("src");
+			auto attach = attachmentByHash(QByteArray::fromHex(hash.toUtf8()));
+			if(!attach)
+			{
+				LOG(WARNING) << "EvernoteNote: trying to save image without corresponding attachment";
+				continue;
+			}
+			mediaTag.setAttribute("type", attach->mimeType());
+			mediaTag.setTagName("en-media");
+		}
+	}
+
+	return newDoc.toString();
+}
+

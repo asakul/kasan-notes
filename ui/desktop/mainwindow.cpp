@@ -9,6 +9,10 @@
 
 #include <QTimer>
 #include <QSettings>
+#include <QFileDialog>
+#include <QFile>
+#include <QCryptographicHash>
+#include <QMimeDatabase>
 
 MainWindow::MainWindow() : m_noteStorage(std::make_shared<NoteStorage>()),
 	m_model(m_noteStorage)
@@ -90,6 +94,36 @@ void MainWindow::saveCurrentNote()
 void MainWindow::noteSaved(const Note::Ptr& note)
 {
 	m_ui.statusbar->showMessage(tr("Note saved"), 5000);
+}
+
+void MainWindow::insertImage()
+{
+	if(!m_currentNote)
+		return;
+
+	auto filepath = QFileDialog::getOpenFileName(this, tr("Insert image"), QString(), QString(tr("Images (*.png, *.jpg);;All files (*.*)")));
+	if(!filepath.isNull())
+	{
+		QFile imageFile(filepath);
+		if(!imageFile.open(QIODevice::ReadOnly))
+		{
+			BOOST_THROW_EXCEPTION(FileNotFound() << error_message(tr("Unable to open file")));
+		}
+		auto data = imageFile.readAll();
+		auto md5 = QCryptographicHash::hash(data, QCryptographicHash::Md5);
+		QMimeDatabase db;
+		auto mime = db.mimeTypeForFile(filepath);
+
+		auto attachment = std::make_shared<Attachment>(mime.name(), data);
+
+		m_currentNote->addAttachment(attachment);
+
+		QImage img;
+		img.loadFromData(data);
+		auto resourceName = "attachment://" + QString::fromUtf8(md5.toHex());
+		m_ui.textEdit->document()->addResource(QTextDocument::ImageResource, resourceName, img);
+		m_ui.textEdit->textCursor().insertImage(resourceName);
+	}
 }
 
 void MainWindow::allNotes(const Notebook::Ptr& root)

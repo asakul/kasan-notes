@@ -50,6 +50,7 @@ set(sources
 	core/backends/common/note.cpp
 	core/backends/common/notebook.cpp
 
+	core/backends/evernote/evernoteattachment.cpp
 	core/backends/evernote/evernotebackend.cpp
 	core/backends/evernote/evernotenote.cpp
 	

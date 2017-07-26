@@ -85,6 +85,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionSave_note"/>
+   <addaction name="actionInsert_image"/>
   </widget>
   <action name="actionSave_note">
    <property name="text">
@@ -92,6 +93,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionInsert_image">
+   <property name="text">
+    <string>Insert image</string>
    </property>
   </action>
  </widget>
@@ -129,9 +135,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionInsert_image</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>insertImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>566</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>notelistClicked(QModelIndex)</slot>
   <slot>saveCurrentNote()</slot>
+  <slot>insertImage()</slot>
  </slots>
 </ui>

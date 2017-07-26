@@ -31,8 +31,12 @@ public slots:
 	void authenticationSuccessful();
 	void addButtonClicked();
 	void notelistClicked(const QModelIndex& index);
+
 	void saveCurrentNote();
 	void noteSaved(const Note::Ptr& note);
+
+	void insertImage();
+
 
 	void allNotes(const Notebook::Ptr& root);
 	void noteUpdated(const Note::Ptr& note);

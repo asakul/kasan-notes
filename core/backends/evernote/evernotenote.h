@@ -19,8 +19,13 @@ public:
 	virtual void setContent(const boost::optional<QString>& content) override;
 	virtual boost::optional<QString> content() const override;
 
+	bool attachmentsChanged() const;
+
 	void setGuid(const QString& g) { m_guid = g; }
 	QString guid() const { return m_guid; }
+
+private:
+	QString convertToEnml(const QString& content);
 
 private:
 	std::weak_ptr<EvernoteBackend> m_backend;

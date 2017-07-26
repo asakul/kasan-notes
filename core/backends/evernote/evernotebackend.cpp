@@ -7,6 +7,7 @@
 
 #include "core/backends/common/note.h"
 #include "core/backends/common/notebook.h"
+#include "core/backends/evernote/evernoteattachment.h"
 #include "core/backends/evernote/evernotenote.h"
 
 #include <QList>
@@ -89,7 +90,8 @@ void EvernoteBackend::requestNoteContent(const Note::Ptr& note)
 	{
 		for(const auto& resource : rawNote.resources.ref())
 		{
-			auto attachment = std::make_shared<Attachment>(resource.mime.value("unknown"), resource.data.ref().body.value(QByteArray()));
+			auto attachment = std::make_shared<EvernoteAttachment>(resource.mime.value("unknown"), resource.data.ref().body.value(QByteArray()));
+			attachment->setGuid(resource.guid.value(""));
 			evernoteNote->addAttachment(attachment);
 			LOG(DEBUG) << "Added attachment: mime: " << attachment->mimeType() << "; hash: " << QString::fromUtf8(attachment->hash().toHex());
 		}
@@ -107,8 +109,44 @@ void EvernoteBackend::updateNote(const Note::Ptr& note)
 		LOG(WARNING) << "Invalid note passed to updateNote to EvernoteBackend: id=" << note->id() << ", backendId=" << note->backendId();
 		return;
 	}
-	qevercloud::Note evNote;
-	evNote.guid = evernoteNote->guid();
+	LOG(DEBUG) << "Content: " << evernoteNote->enml().value();
+
+	qevercloud::Note evNote = m_client->getNote(evernoteNote->guid(), false, false, false, false);
+	QList<QString> oldResources;
+	QList<Attachment::Ptr> newResources;
+
+	for(int i = 0; i < evernoteNote->attachmentsCount(); i++)
+	{
+		auto evernoteAttachment = std::dynamic_pointer_cast<EvernoteAttachment>(evernoteNote->attachmentByIndex(i));
+		if(!evernoteAttachment) // Generic new Attachment added by editor
+		{
+			newResources.append(evernoteNote->attachmentByIndex(i));
+		}
+		else
+		{
+			oldResources.append(evernoteAttachment->guid());
+		}
+	}
+
+	QList<qevercloud::Resource> resources;
+	for(const auto& guid : oldResources)
+	{
+		qevercloud::Resource r;
+		r.guid = guid;
+		resources.append(r);
+	}
+	for(const auto& attach : newResources)
+	{
+		qevercloud::Resource r;
+		r.mime = attach->mimeType();
+		qevercloud::Data d;
+		d.bodyHash = attach->hash();
+		d.size = attach->data().size();
+		d.body = attach->data();
+		r.data = d;
+		resources.append(r);
+	}
+
 	evNote.title = note->title();
 	auto content = evernoteNote->enml();
 	if(content.isSet())
