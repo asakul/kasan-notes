@@ -8,12 +8,24 @@
 #include "exceptions.h"
 
 #include <QTimer>
+#include <QSettings>
 
 MainWindow::MainWindow() : m_noteStorage(std::make_shared<NoteStorage>()),
 	m_model(m_noteStorage)
 {
 	m_ui.setupUi(this);
 	m_ui.tv_notes->setModel(&m_model);
+
+	QSettings settings;
+	auto splitterGeometry = settings.value("mainwindow/splitter_geometry").toByteArray();
+	if(splitterGeometry.isEmpty())
+	{
+		m_ui.splitter->setSizes({200, 800});
+	}
+	else
+	{
+		m_ui.splitter->restoreState(splitterGeometry);
+	}
 }
 
 MainWindow::~MainWindow()
@@ -104,5 +116,10 @@ void MainWindow::setNoteAsCurrent(const Note::Ptr& note)
 	{
 		m_ui.textEdit->setText(note->content().get());
 	}
+}
 
+void MainWindow::closeEvent(QCloseEvent * event)
+{
+	QSettings settings;
+	settings.setValue("mainwindow/splitter_geometry", m_ui.splitter->saveState());
 }

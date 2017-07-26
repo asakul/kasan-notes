@@ -62,7 +62,10 @@ int KasanNotesApplication::run()
 	m_mainWindow.show();
 	m_mainWindow.forceNotesRefresh();
 
-	return exec();
+	int rc = exec();
+	m_backendThread->quit();
+	m_backendThread->wait(1000);
+	return rc;
 }
 
 void KasanNotesApplication::authenticationCompleted()

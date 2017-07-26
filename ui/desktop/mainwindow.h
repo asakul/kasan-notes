@@ -34,6 +34,9 @@ public slots:
 	void allNotes(const Notebook::Ptr& root);
 	void noteUpdated(const Note::Ptr& note);
 
+protected:
+	virtual void closeEvent(QCloseEvent * event);
+
 private:
 	void setNoteAsCurrent(const Note::Ptr& note);
 

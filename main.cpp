@@ -9,6 +9,9 @@
 
 int main(int argc, char** argv)
 {
+	QCoreApplication::setOrganizationName("K.A.S.A.N.");
+	QCoreApplication::setOrganizationDomain("kasan.ws");
+	QCoreApplication::setApplicationName("kasan.notes");
 	KasanNotesApplication app(argc, argv);
 
 	try
