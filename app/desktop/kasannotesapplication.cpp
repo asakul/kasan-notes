@@ -13,10 +13,6 @@
 
 KasanNotesApplication::KasanNotesApplication(int& argc, char** argv) : QApplication(argc, argv)
 {
-	setOrganizationDomain("kasan.ws");
-	setOrganizationName("K.A.S.A.N.");
-	setApplicationName("kasan.notes");
-
 	registerMetatypes();
 }
 
