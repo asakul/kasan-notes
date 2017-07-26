@@ -55,7 +55,20 @@ void EvernoteNote::setContent(const boost::optional<QString>& content)
 {
 	if(content)
 	{
-		auto newContent = convertToEnml(content.value());
+		auto newContentAndHashes = convertToEnml(content.value());
+		auto newContent = newContentAndHashes.first;
+		auto usedHashes = newContentAndHashes.second;
+
+		for(int i = 0; i < attachmentsCount(); i++)
+		{
+			auto attachment = attachmentByIndex(i);
+			if(!usedHashes.contains(QString::fromUtf8(attachment->hash().toHex())))
+			{
+				LOG(DEBUG) << "Removing unused hash: " << attachment->hash();
+				removeAttachment(attachment);
+			}
+		}
+
 		m_note.content = newContent;
 	}
 }
@@ -68,8 +81,9 @@ boost::optional<QString> EvernoteNote::content() const
 		return boost::optional<QString>();
 }
 
-QString EvernoteNote::convertToEnml(const QString& content)
+QPair<QString, QSet<QString>> EvernoteNote::convertToEnml(const QString& content)
 {
+	QSet<QString> usedHashes;
 	QDomDocument doc;
 	doc.setContent(content);
 
@@ -86,7 +100,7 @@ QString EvernoteNote::convertToEnml(const QString& content)
 		auto src = mediaTag.attribute("src");
 		if(src.startsWith("attachment://"))
 		{
-			auto hash = src.mid(strlen("attachment://"));
+			auto hash = src.mid(13);
 			mediaTag.setAttribute("hash", hash);
 			mediaTag.removeAttribute("src");
 			auto attach = attachmentByHash(QByteArray::fromHex(hash.toUtf8()));
@@ -95,11 +109,13 @@ QString EvernoteNote::convertToEnml(const QString& content)
 				LOG(WARNING) << "EvernoteNote: trying to save image without corresponding attachment";
 				continue;
 			}
+			LOG(DEBUG) << "Found hash: " << hash;
+			usedHashes.insert(hash);
 			mediaTag.setAttribute("type", attach->mimeType());
 			mediaTag.setTagName("en-media");
 		}
 	}
 
-	return newDoc.toString();
+	return qMakePair(newDoc.toString(), usedHashes);
 }
 

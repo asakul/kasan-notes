@@ -36,6 +36,7 @@ public:
 	virtual Attachment::Ptr attachmentByHash(const QByteArray& hash) const;
 	virtual Attachment::Ptr attachmentByIndex(size_t index) const;
 	virtual size_t attachmentsCount() const;
+	virtual void removeAttachment(const Attachment::Ptr& attachment);
 
 	virtual void setParent(const std::shared_ptr<Notebook>& parent);
 	virtual std::weak_ptr<Notebook> parent() const;

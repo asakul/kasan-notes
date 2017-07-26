@@ -117,6 +117,7 @@ void EvernoteBackend::updateNote(const Note::Ptr& note)
 
 	for(int i = 0; i < evernoteNote->attachmentsCount(); i++)
 	{
+		LOG(DEBUG) << "Attachment: " << evernoteNote->attachmentByIndex(i)->hash().toHex();
 		auto evernoteAttachment = std::dynamic_pointer_cast<EvernoteAttachment>(evernoteNote->attachmentByIndex(i));
 		if(!evernoteAttachment) // Generic new Attachment added by editor
 		{
@@ -134,6 +135,7 @@ void EvernoteBackend::updateNote(const Note::Ptr& note)
 		qevercloud::Resource r;
 		r.guid = guid;
 		resources.append(r);
+		LOG(DEBUG) << "Adding old resource: " << r.guid.value();
 	}
 	for(const auto& attach : newResources)
 	{
@@ -145,7 +147,10 @@ void EvernoteBackend::updateNote(const Note::Ptr& note)
 		d.body = attach->data();
 		r.data = d;
 		resources.append(r);
+		LOG(DEBUG) << "Adding new resource: " << QString::fromUtf8(attach->hash().toHex());
 	}
+
+	evNote.resources = resources;
 
 	evNote.title = note->title();
 	auto content = evernoteNote->enml();
@@ -159,4 +164,5 @@ void EvernoteBackend::updateNote(const Note::Ptr& note)
 	{
 		LOG(WARNING) << "EvernoteBackend: trying to update note without content";
 	}
+	LOG(INFO) << "Note updated";
 }
