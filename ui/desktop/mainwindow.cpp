@@ -30,6 +30,8 @@ MainWindow::MainWindow() : m_noteStorage(std::make_shared<NoteStorage>()),
 	{
 		m_ui.splitter->restoreState(splitterGeometry);
 	}
+
+	restoreGeometry(settings.value("mainwindow/geometry").toByteArray());
 }
 
 MainWindow::~MainWindow()
@@ -172,4 +174,5 @@ void MainWindow::closeEvent(QCloseEvent * event)
 {
 	QSettings settings;
 	settings.setValue("mainwindow/splitter_geometry", m_ui.splitter->saveState());
+	settings.setValue("mainwindow/geometry", saveGeometry());
 }
