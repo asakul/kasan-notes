@@ -4,22 +4,20 @@
 #include "core/backends/evernote/evernotebackend.h"
 #include "core/backends/common/note.h"
 #include "core/backends/common/notebook.h"
+
 #include "exceptions.h"
 
-#include <QQuickItem>
-#include <QQmlError>
-#include <QScreen>
 #include <QTimer>
+#include <QFile>
 
 
-KasanNotesApplication::KasanNotesApplication(int& argc, char** argv) : QGuiApplication(argc, argv)
+KasanNotesApplication::KasanNotesApplication(int& argc, char** argv) : QApplication(argc, argv)
 {
 	setOrganizationDomain("kasan.ws");
 	setOrganizationName("K.A.S.A.N.");
 	setApplicationName("kasan.notes");
 
 	registerMetatypes();
-	m_mainWindowController.setView(&m_view);
 }
 
 KasanNotesApplication::~KasanNotesApplication()
@@ -49,35 +47,27 @@ int KasanNotesApplication::run()
 	auto tokenAndUrl = readTokenAndUrlFromFile("dev-data/dev-token.txt");
 	m_backend = EvernoteBackend::createFromDeveloperToken(tokenAndUrl.first, tokenAndUrl.second);
 
-	m_mainWindowController.setBackend(m_backend);
+	m_mainWindow.setBackend(m_backend);
 
 	if(m_backend->isAuthenticated())
 	{
 		authenticationCompleted();
-		m_mainWindowController.authenticationSuccessful();
+		m_mainWindow.authenticationSuccessful();
 	}
 
 	m_backendThread = std::unique_ptr<QThread>(new QThread);
 	m_backend->moveToThread(m_backendThread.get());
 	m_backendThread->start();
 
-	m_mainWindowController.forceNotesRefresh();
+	m_mainWindow.show();
+	m_mainWindow.forceNotesRefresh();
 
 	return exec();
 }
 
 void KasanNotesApplication::authenticationCompleted()
 {
-	auto locator = createDefaultFileLocator();
-	m_view.setFlags(Qt::Window);
-	m_view.setResizeMode(QQuickView::SizeRootObjectToView);
-	m_view.setSource(QUrl::fromLocalFile(locator->getUiFile("main")));
-	m_view.setVisibility(QWindow::Maximized);
 
-	auto root = m_view.rootObject();
-	auto toolbar = root->findChild<QObject*>("toolbar");
-
-	connect(toolbar, SIGNAL(addButtonClicked()), &m_mainWindowController, SLOT(addButtonClicked()));
 }
 
 void KasanNotesApplication::registerMetatypes()

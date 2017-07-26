@@ -41,7 +41,30 @@ QModelIndex NoteStorageModel::index(int row, int column,
 
 QModelIndex NoteStorageModel::parent(const QModelIndex& child) const
 {
-	return QModelIndex();
+	Notebook* parentNotebook = static_cast<Notebook*>(child.internalPointer());
+	if(parentNotebook == nullptr)
+	{
+		return QModelIndex();
+	}
+	else
+	{
+		auto grandparentNotebook = parentNotebook->parent().lock();
+		if(!grandparentNotebook)
+			return QModelIndex();
+		int indexOfNotebook = -1;
+		for(int i = 0; i < grandparentNotebook->notebooksCount(); i++)
+		{
+			if(grandparentNotebook->notebookByIndex(i).get() == parentNotebook)
+			{
+				indexOfNotebook = i;
+				break;
+			}
+		}
+		if(indexOfNotebook < 0)
+			return QModelIndex();
+
+		return createIndex(indexOfNotebook, child.column(), grandparentNotebook.get());
+	}
 }
 
 int NoteStorageModel::rowCount(const QModelIndex& parent) const

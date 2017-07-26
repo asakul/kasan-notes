@@ -62,3 +62,13 @@ size_t Note::attachmentsCount() const
 {
 	return m_attachments.size();
 }
+
+void Note::setParent(const std::shared_ptr<Notebook>& parent)
+{
+	m_parent = parent;
+}
+
+std::weak_ptr<Notebook> Note::parent() const
+{
+	return m_parent;
+}

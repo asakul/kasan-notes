@@ -12,6 +12,8 @@
 #include <QMetaType>
 #include <QMap>
 
+class Notebook;
+
 class Note
 {
 public:
@@ -35,6 +37,9 @@ public:
 	virtual Attachment::Ptr attachmentByIndex(size_t index) const;
 	virtual size_t attachmentsCount() const;
 
+	virtual void setParent(const std::shared_ptr<Notebook>& parent);
+	virtual std::weak_ptr<Notebook> parent() const;
+
 private:
 	id_t m_id;
 	QString m_backendId;
@@ -42,6 +47,7 @@ private:
 	QString m_path;
 	QString m_title;
 	boost::optional<QString> m_content;
+	std::weak_ptr<Notebook> m_parent;
 
 	QMap<QByteArray, Attachment::Ptr> m_attachments;
 };

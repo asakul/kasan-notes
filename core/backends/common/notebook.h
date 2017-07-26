@@ -14,10 +14,11 @@
 #include <QList>
 
 
-class Notebook
+class Notebook : public std::enable_shared_from_this<Notebook>
 {
 public:
 	using Ptr = std::shared_ptr<Notebook>;
+	using WeakPtr = std::weak_ptr<Notebook>;
 	using id_t = uint64_t;
 
 	Notebook(const id_t& id, const QString& backendId);
@@ -39,6 +40,8 @@ public:
 	virtual size_t notebooksCount() const;
 	virtual Notebook::Ptr notebookByIndex(size_t index) const;
 
+	virtual void setParent(const std::shared_ptr<Notebook>& parent);
+	virtual std::weak_ptr<Notebook> parent() const;
 
 private:
 	id_t m_id;
@@ -47,6 +50,7 @@ private:
 	QString m_title;
 	QList<Notebook::Ptr> m_notebooks;
 	QList<Note::Ptr> m_notes;
+	Notebook::WeakPtr m_parent;
 };
 
 #endif /* CORE_BACKENDS_COMMON_NOTEBOOK_H_ */

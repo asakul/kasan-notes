@@ -1,15 +1,13 @@
 #ifndef APP_DESKTOP_KASANNOTESAPPLICATION_H_
 #define APP_DESKTOP_KASANNOTESAPPLICATION_H_
 
-#include <QGuiApplication>
+#include <QApplication>
 #include <QThread>
-#include <QQuickView>
-#include <QQmlApplicationEngine>
 #include <memory>
 #include "core/backends/common/backend.h"
-#include "mainwindowcontroller.h"
+#include "ui/desktop/mainwindow.h"
 
-class KasanNotesApplication : public QGuiApplication
+class KasanNotesApplication : public QApplication
 {
 	Q_OBJECT
 public:
@@ -28,9 +26,7 @@ private:
 private:
 	Backend::Ptr m_backend;
 	std::unique_ptr<QThread> m_backendThread;
-	QQuickView m_view;
-	QQmlApplicationEngine m_engine;
-	MainWindowController m_mainWindowController;
+	MainWindow m_mainWindow;
 };
 
 #endif /* APP_DESKTOP_KASANNOTESAPPLICATION_H_ */

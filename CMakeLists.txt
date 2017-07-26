@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(kasan-notes)
 
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/3rdparty/cmake")
 
@@ -17,8 +18,6 @@ find_package(Qt5Xml)
 
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Gui_INCLUDE_DIRS})
-include_directories(${Qt5Quick_INCLUDE_DIRS})
-include_directories(${Qt5Qml_INCLUDE_DIRS})
 include_directories(${Qt5Network_INCLUDE_DIRS})
 include_directories(${Qt5Xml_INCLUDE_DIRS})
 
@@ -45,7 +44,6 @@ set(sources
 
 	app/desktop/kasannotesapplication.cpp
 	app/desktop/desktopfilelocator.cpp
-	app/desktop/mainwindowcontroller.cpp
 	
 	core/backends/common/attachment.cpp
 	core/backends/common/backend.cpp
@@ -57,13 +55,15 @@ set(sources
 	
 	core/notestorage/notestorage.cpp
 	core/notestorage/notestoragemodel.cpp
+	
+	ui/desktop/mainwindow.cpp
 )
 
 add_executable(kasan-notes main.cpp ${sources} ${3rdparty-sources} ${test_sources})
 target_link_libraries(kasan-notes ${Boost_LIBRARIES} -lqt5qevercloud)
-qt5_use_modules(kasan-notes Widgets Gui Quick Qml Network Xml)
+qt5_use_modules(kasan-notes Widgets Gui Network Xml)
 
 add_executable(kasan-notes-tests test.cpp ${sources} ${3rdparty-sources} ${test_sources})
 target_link_libraries(kasan-notes-tests ${Boost_LIBRARIES} -lqt5qevercloud)
-qt5_use_modules(kasan-notes-tests Widgets Gui Quick Qml Network Xml)
+qt5_use_modules(kasan-notes-tests Widgets Gui Network Xml)
 

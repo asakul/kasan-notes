@@ -37,6 +37,7 @@ QString Notebook::title() const
 void Notebook::addNote(const Note::Ptr& note)
 {
 	m_notes.append(note);
+	note->setParent(shared_from_this());
 }
 
 size_t Notebook::notesCount() const
@@ -77,6 +78,7 @@ void Notebook::removeNote(const Note::Ptr& note)
 void Notebook::addNotebook(const Notebook::Ptr& notebook)
 {
 	m_notebooks.append(notebook);
+	notebook->setParent(shared_from_this());
 }
 
 size_t Notebook::notebooksCount() const
@@ -87,6 +89,16 @@ size_t Notebook::notebooksCount() const
 Notebook::Ptr Notebook::notebookByIndex(size_t index) const
 {
 	return m_notebooks[index];
+}
+
+void Notebook::setParent(const std::shared_ptr<Notebook>& parent)
+{
+	m_parent = parent;
+}
+
+std::weak_ptr<Notebook> Notebook::parent() const
+{
+	return m_parent;
 }
 
 
