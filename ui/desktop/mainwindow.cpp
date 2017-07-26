@@ -101,7 +101,7 @@ void MainWindow::insertImage()
 	if(!m_currentNote)
 		return;
 
-	auto filepath = QFileDialog::getOpenFileName(this, tr("Insert image"), QString(), QString(tr("Images (*.png, *.jpg);;All files (*.*)")));
+	auto filepath = QFileDialog::getOpenFileName(this, tr("Insert image"), QString(), QString(tr("Images (*.png *.jpg *.gif);;All files (*.*)")));
 	if(!filepath.isNull())
 	{
 		QFile imageFile(filepath);
@@ -110,7 +110,6 @@ void MainWindow::insertImage()
 			BOOST_THROW_EXCEPTION(FileNotFound() << error_message(tr("Unable to open file")));
 		}
 		auto data = imageFile.readAll();
-		auto md5 = QCryptographicHash::hash(data, QCryptographicHash::Md5);
 		QMimeDatabase db;
 		auto mime = db.mimeTypeForFile(filepath);
 
@@ -120,7 +119,7 @@ void MainWindow::insertImage()
 
 		QImage img;
 		img.loadFromData(data);
-		auto resourceName = "attachment://" + QString::fromUtf8(md5.toHex());
+		auto resourceName = "attachment://" + QString::fromUtf8(attachment->hash().toHex());
 		m_ui.textEdit->document()->addResource(QTextDocument::ImageResource, resourceName, img);
 		m_ui.textEdit->textCursor().insertImage(resourceName);
 	}

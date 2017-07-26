@@ -63,6 +63,12 @@ size_t Note::attachmentsCount() const
 	return m_attachments.size();
 }
 
+void Note::removeAttachment(const Attachment::Ptr& attachment)
+{
+	m_attachments.remove(attachment->hash());
+}
+
+
 void Note::setParent(const std::shared_ptr<Notebook>& parent)
 {
 	m_parent = parent;

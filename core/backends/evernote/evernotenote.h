@@ -25,7 +25,8 @@ public:
 	QString guid() const { return m_guid; }
 
 private:
-	QString convertToEnml(const QString& content);
+	// Returns enml document and set of used media hashes
+	QPair<QString, QSet<QString>> convertToEnml(const QString& content);
 
 private:
 	std::weak_ptr<EvernoteBackend> m_backend;
