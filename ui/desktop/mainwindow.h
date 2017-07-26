@@ -25,11 +25,14 @@ public:
 
 signals:
 	void requestNoteContent(const Note::Ptr& note);
+	void updateNote(const Note::Ptr& note);
 
 public slots:
 	void authenticationSuccessful();
 	void addButtonClicked();
 	void notelistClicked(const QModelIndex& index);
+	void saveCurrentNote();
+	void noteSaved(const Note::Ptr& note);
 
 	void allNotes(const Notebook::Ptr& root);
 	void noteUpdated(const Note::Ptr& note);
@@ -44,6 +47,7 @@ private:
 	Backend::Ptr m_backend;
 	NoteStorage::Ptr m_noteStorage;
 	NoteStorageModel m_model;
+	Note::Ptr m_currentNote;
 
 	Ui::MainWindow m_ui;
 };

@@ -26,6 +26,7 @@ signals:
 public slots:
 	virtual void requestAllNotes() override;
 	virtual void requestNoteContent(const Note::Ptr& id) override;
+	virtual void updateNote(const Note::Ptr& note) override;
 
 private:
 	std::unique_ptr<qevercloud::NoteStore> m_client;

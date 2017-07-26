@@ -97,3 +97,28 @@ void EvernoteBackend::requestNoteContent(const Note::Ptr& note)
 	evernoteNote->setEnml(rawNote.content.value(""));
 	emit noteUpdated(note);
 }
+
+void EvernoteBackend::updateNote(const Note::Ptr& note)
+{
+	LOG(DEBUG) << "EvernoteBackend: updateNote: " << note->id();
+	auto evernoteNote = std::dynamic_pointer_cast<EvernoteNote>(note);
+	if(!evernoteNote)
+	{
+		LOG(WARNING) << "Invalid note passed to updateNote to EvernoteBackend: id=" << note->id() << ", backendId=" << note->backendId();
+		return;
+	}
+	qevercloud::Note evNote;
+	evNote.guid = evernoteNote->guid();
+	evNote.title = note->title();
+	auto content = evernoteNote->enml();
+	if(content.isSet())
+	{
+		evNote.content = content.value("");
+		m_client->updateNote(evNote);
+		emit noteSaved(note);
+	}
+	else
+	{
+		LOG(WARNING) << "EvernoteBackend: trying to update note without content";
+	}
+}

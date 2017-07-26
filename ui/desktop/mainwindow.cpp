@@ -38,6 +38,8 @@ void MainWindow::setBackend(const Backend::Ptr& backend)
 	connect(backend.get(), SIGNAL(allNotes(Notebook::Ptr)), this, SLOT(allNotes(Notebook::Ptr)));
 	connect(this, SIGNAL(requestNoteContent(Note::Ptr)), backend.get(), SLOT(requestNoteContent(Note::Ptr)));
 	connect(backend.get(), SIGNAL(noteUpdated(Note::Ptr)), this, SLOT(noteUpdated(Note::Ptr)));
+	connect(this, SIGNAL(updateNote(Note::Ptr)), backend.get(), SLOT(updateNote(Note::Ptr)));
+	connect(backend.get(), SIGNAL(noteSaved(Note::Ptr)), this, SLOT(noteSaved(Note::Ptr)));
 }
 
 void MainWindow::forceNotesRefresh()
@@ -74,6 +76,20 @@ void MainWindow::notelistClicked(const QModelIndex& index)
 			LOG(WARNING) << *maybeStr;
 		}
 	}
+}
+
+void MainWindow::saveCurrentNote()
+{
+	if(m_currentNote)
+	{
+		m_currentNote->setContent(m_ui.textEdit->toHtml());
+		emit updateNote(m_currentNote);
+	}
+}
+
+void MainWindow::noteSaved(const Note::Ptr& note)
+{
+	m_ui.statusbar->showMessage(tr("Note saved"), 5000);
 }
 
 void MainWindow::allNotes(const Notebook::Ptr& root)
@@ -115,6 +131,7 @@ void MainWindow::setNoteAsCurrent(const Note::Ptr& note)
 	if(note->content())
 	{
 		m_ui.textEdit->setText(note->content().get());
+		m_currentNote = note;
 	}
 }
 

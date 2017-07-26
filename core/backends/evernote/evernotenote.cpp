@@ -5,16 +5,21 @@
 #include "log.h"
 
 #include <QDomDocument>
+#include <QDomImplementation>
 
 static QString convertToEnml(const QString& content)
 {
-	QString result =
-R"(<?xml version="1.0" encoding="UTF-8"?>""
-<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">"
-<en-note>)";
-	result += content;
-	result += "</en-note>";
-	return result;
+	QDomDocument doc;
+	doc.setContent(content);
+
+	auto body = doc.elementsByTagName("body").at(0);
+
+	QDomDocument newDoc(doc.implementation().createDocumentType("en-note", QString(), "http://xml.evernote.com/pub/enml2.dtd"));
+	auto newbody = newDoc.importNode(body, true).toElement();
+	newDoc.appendChild(newbody);
+	newbody.setTagName("en-note");
+
+	return newDoc.toString();
 }
 
 static QString convertFromEnml(const QString& enml)
@@ -56,11 +61,17 @@ void EvernoteNote::setEnml(const QString& enml)
 	m_note.content = enml;
 }
 
+qevercloud::Optional<QString> EvernoteNote::enml() const
+{
+	return m_note.content;
+}
+
 void EvernoteNote::setContent(const boost::optional<QString>& content)
 {
 	if(content)
 	{
-		m_note.content = convertToEnml(content.value());
+		auto newContent =  convertToEnml(content.value());
+		m_note.content = newContent;
 	}
 }
 

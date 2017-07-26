@@ -20,10 +20,12 @@ public:
 signals:
 	void allNotes(const Notebook::Ptr& root);
 	void noteUpdated(const Note::Ptr& note);
+	void noteSaved(const Note::Ptr& note);
 
 public slots:
 	virtual void requestAllNotes() = 0;
 	virtual void requestNoteContent(const Note::Ptr& id) = 0;
+	virtual void updateNote(const Note::Ptr& note) = 0;
 };
 
 
