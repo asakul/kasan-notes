@@ -108,6 +108,7 @@ void MainWindow::saveCurrentNote()
 {
 	if(m_currentNote)
 	{
+		m_currentNote->setTitle(m_ui.e_title->text());
 		m_currentNote->setContent(m_ui.textEdit->toHtml());
 		emit updateNote(m_currentNote);
 	}
@@ -185,6 +186,7 @@ void MainWindow::setNoteAsCurrent(const Note::Ptr& note)
 	LOG(DEBUG) << "Content: " << note->content().value_or("");
 	if(note->content())
 	{
+		m_ui.e_title->setText(note->title());
 		m_ui.textEdit->setText(note->content().get());
 		m_currentNote = note;
 	}
