@@ -12,7 +12,15 @@
 
 #include <QList>
 
-EvernoteBackend::EvernoteBackend() : Backend()
+static QString emptyNoteContent = R"(
+<!DOCTYPE en-note SYSTEM 'http://xml.evernote.com/pub/enml2.dtd'>
+<en-note>
+</en-note>
+)";
+
+EvernoteBackend::EvernoteBackend() : Backend(),
+	m_noteIdCounter(1),
+	m_notebookIdCounter(1)
 {
 
 }
@@ -33,8 +41,6 @@ bool EvernoteBackend::isAuthenticated()
 
 void EvernoteBackend::requestAllNotes()
 {
-	Note::id_t noteId = 1;
-	Notebook::id_t notebookId = 1;
 	QList<Note::Ptr> notesList;
 
 	const int NotesInChunk = 50;
@@ -52,7 +58,7 @@ void EvernoteBackend::requestAllNotes()
 		resultSpec.includeUpdateSequenceNum = true;
 		int startIndex = 0;
 
-		auto evernoteNotebook = std::make_shared<EvernoteNotebook>(notebookId);
+		auto evernoteNotebook = std::static_pointer_cast<EvernoteNotebook>(makeNotebook());
 		evernoteNotebook->setGuid(notebook.guid);
 		evernoteNotebook->setTitle(notebook.name.value("[unset]"));
 		root->addNotebook(evernoteNotebook);
@@ -65,7 +71,7 @@ void EvernoteBackend::requestAllNotes()
 						" (" << metadata.guid << ";" <<
 						metadata.updateSequenceNum.value(-1) << ")";
 
-				auto note = std::make_shared<EvernoteNote>(noteId, shared_from_this());
+				auto note = std::static_pointer_cast<EvernoteNote>(makeNote());
 				note->setGuid(metadata.guid);
 				note->setTitle(metadata.title.value("[untitled]"));
 				evernoteNotebook->addNote(note);
@@ -166,4 +172,35 @@ void EvernoteBackend::updateNote(const Note::Ptr& note)
 		LOG(WARNING) << "EvernoteBackend: trying to update note without content";
 	}
 	LOG(INFO) << "Note updated";
+}
+
+Note::Ptr EvernoteBackend::makeNote()
+{
+	return std::make_shared<EvernoteNote>(m_noteIdCounter.fetch_add(1), shared_from_this());
+}
+
+Notebook::Ptr EvernoteBackend::makeNotebook()
+{
+	return std::make_shared<EvernoteNotebook>(m_notebookIdCounter.fetch_add(1));
+}
+
+void EvernoteBackend::createNewNote(const Notebook::Ptr& parentNotebook)
+{
+	LOG(DEBUG) << "EvernoteBackend: create new note";
+	auto evernoteNotebook = std::dynamic_pointer_cast<EvernoteNotebook>(parentNotebook);
+	if(evernoteNotebook)
+	{
+		qevercloud::Note note;
+		note.notebookGuid = evernoteNotebook->guid();
+		note.title = QString("[Untitled]");
+		note.content = emptyNoteContent;
+		auto newNote = m_client->createNote(note);
+		auto evernoteNote = std::static_pointer_cast<EvernoteNote>(makeNote());
+		evernoteNote->setGuid(newNote.guid.value());
+		evernoteNote->setTitle(newNote.title.value());
+		evernoteNote->setContent(newNote.content.value());
+		parentNotebook->addNote(evernoteNote);
+		emit noteCreated(evernoteNote);
+		LOG(INFO) << "EvernoteBackend: New note created: " << evernoteNote->guid();
+	}
 }

@@ -26,11 +26,15 @@ public:
 signals:
 	void requestNoteContent(const Note::Ptr& note);
 	void updateNote(const Note::Ptr& note);
+	void createNote(const Notebook::Ptr& parentNotebook);
 
 public slots:
 	void authenticationSuccessful();
 	void addButtonClicked();
 	void notelistClicked(const QModelIndex& index);
+
+	void createNewNote();
+	void noteCreated(const Note::Ptr& note);
 
 	void saveCurrentNote();
 	void noteSaved(const Note::Ptr& note);

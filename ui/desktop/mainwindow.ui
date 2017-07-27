@@ -84,6 +84,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionCreate_new_note"/>
    <addaction name="actionSave_note"/>
    <addaction name="actionInsert_image"/>
   </widget>
@@ -98,6 +99,14 @@
   <action name="actionInsert_image">
    <property name="text">
     <string>Insert image</string>
+   </property>
+  </action>
+  <action name="actionCreate_new_note">
+   <property name="text">
+    <string>Create new note</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
  </widget>
@@ -151,10 +160,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionCreate_new_note</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>createNewNote()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>566</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>notelistClicked(QModelIndex)</slot>
   <slot>saveCurrentNote()</slot>
   <slot>insertImage()</slot>
+  <slot>createNewNote()</slot>
  </slots>
 </ui>

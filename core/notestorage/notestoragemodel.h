@@ -14,7 +14,8 @@ class NoteStorageModel : public QAbstractItemModel
 public:
 	enum
 	{
-		NoteRole = Qt::UserRole + 1
+		NoteRole = Qt::UserRole + 1,
+		NotebookRole
 	};
 
 	NoteStorageModel(const NoteStorage::Ptr& noteStorage);

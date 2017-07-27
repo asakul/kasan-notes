@@ -12,6 +12,7 @@
 
 #include <QString>
 #include <QList>
+#include <QMetaType>
 
 
 class Notebook : public std::enable_shared_from_this<Notebook>
@@ -52,5 +53,7 @@ private:
 	QList<Note::Ptr> m_notes;
 	Notebook::WeakPtr m_parent;
 };
+
+Q_DECLARE_METATYPE(Notebook::Ptr);
 
 #endif /* CORE_BACKENDS_COMMON_NOTEBOOK_H_ */

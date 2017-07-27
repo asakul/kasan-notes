@@ -6,6 +6,8 @@
 
 #include "doctest/doctest.h"
 
+#include "log.h"
+
 Notebook::Notebook(const id_t& id, const QString& backendId) : m_id(id), m_backendId(backendId)
 {
 }
@@ -104,29 +106,29 @@ std::weak_ptr<Notebook> Notebook::parent() const
 
 TEST_CASE("Notebook basic functionality")
 {
-	Notebook notebook(1, "foo_backend");
+	auto notebook = std::make_shared<Notebook>(1, "foo_backend");
 
 	SUBCASE("Returns given ID")
 	{
-		REQUIRE(notebook.id() == 1);
+		REQUIRE(notebook->id() == 1);
 	}
 
 	SUBCASE("Returns given backend ID")
 	{
-		REQUIRE(notebook.backendId() == "foo_backend");
+		REQUIRE(notebook->backendId() == "foo_backend");
 	}
 
 	SUBCASE("Title manipulation")
 	{
 		SUBCASE("Default title is empty")
 		{
-			REQUIRE(notebook.title().isEmpty());
+			REQUIRE(notebook->title().isEmpty());
 		}
 
 		SUBCASE("Set/get title")
 		{
-			notebook.setTitle("foo_title");
-			REQUIRE(notebook.title() == "foo_title");
+			notebook->setTitle("foo_title");
+			REQUIRE(notebook->title() == "foo_title");
 		}
 	}
 
@@ -137,29 +139,29 @@ TEST_CASE("Notebook basic functionality")
 
 		SUBCASE("No notes by default")
 		{
-			REQUIRE(notebook.notesCount() == 0);
+			REQUIRE(notebook->notesCount() == 0);
 		}
 
-		notebook.addNote(note2);
-		notebook.addNote(note1);
+		notebook->addNote(note2);
+		notebook->addNote(note1);
 
 		SUBCASE("Get by index")
 		{
-			REQUIRE(notebook.noteByIndex(0) == note2);
-			REQUIRE(notebook.noteByIndex(1) == note1);
+			REQUIRE(notebook->noteByIndex(0) == note2);
+			REQUIRE(notebook->noteByIndex(1) == note1);
 		}
 
 		SUBCASE("Get by ID")
 		{
-			REQUIRE(notebook.noteById(2) == note2);
-			REQUIRE(notebook.noteById(1) == note1);
+			REQUIRE(notebook->noteById(2) == note2);
+			REQUIRE(notebook->noteById(1) == note1);
 		}
 
 		SUBCASE("Remove note")
 		{
-			notebook.removeNote(note2);
-			REQUIRE(notebook.notesCount() == 1);
-			REQUIRE(notebook.noteById(2) == nullptr);
+			notebook->removeNote(note2);
+			REQUIRE(notebook->notesCount() == 1);
+			REQUIRE(notebook->noteById(2) == nullptr);
 		}
 	}
 }

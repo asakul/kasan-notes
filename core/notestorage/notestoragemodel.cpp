@@ -140,6 +140,21 @@ QVariant NoteStorageModel::data(const QModelIndex& index, int role) const
 			return QVariant::fromValue(note);
 		}
 	}
+	else if(role == NotebookRole)
+	{
+		auto parentNotebook = static_cast<Notebook*>(index.internalPointer());
+		if(!parentNotebook)
+			return QVariant();
+
+		if(index.row() < parentNotebook->notebooksCount())
+		{
+			return QVariant::fromValue(parentNotebook->notebookByIndex(index.row()));
+		}
+		else
+		{
+			return QVariant::fromValue(parentNotebook->shared_from_this());
+		}
+	}
 	else
 	{
 		return QVariant();
@@ -248,3 +263,37 @@ TEST_CASE("NoteStorageModel: custom data role - NoteRole")
 		REQUIRE(model.data(model.index(0, 0, model.index(0, 0)), NoteStorageModel::NoteRole).value<Note::Ptr>() == note1);
 	}
 }
+
+
+TEST_CASE("NoteStorageModel: custom data role - NotebookRole")
+{
+	auto storage = std::make_shared<NoteStorage>();
+	NoteStorageModel model(storage);
+
+	auto notebook = std::make_shared<Notebook>(1, "foo");
+	notebook->setTitle("category");
+	storage->rootNotebook()->addNotebook(notebook);
+
+	auto note1 = std::make_shared<Note>(1, "foo");
+	note1->setTitle("Note1");
+	notebook->addNote(note1);
+
+	auto note2 = std::make_shared<Note>(2, "foo");
+	note2->setTitle("Note2");
+	notebook->addNote(note2);
+
+	model.notesChanged();
+
+	SUBCASE("If index corresponds to a Notebook, return this notebook")
+	{
+		REQUIRE(model.data(model.index(0, 0), NoteStorageModel::NotebookRole).value<Notebook::Ptr>() == notebook);
+	}
+
+	SUBCASE("If index corresponds to a Note, return parent notebook")
+	{
+		REQUIRE(model.data(model.index(0, 0, model.index(0, 0)), NoteStorageModel::NotebookRole).value<Notebook::Ptr>() == notebook);
+		REQUIRE(model.data(model.index(1, 0, model.index(0, 0)), NoteStorageModel::NotebookRole).value<Notebook::Ptr>() == notebook);
+	}
+
+}
+

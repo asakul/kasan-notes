@@ -46,6 +46,9 @@ void MainWindow::setBackend(const Backend::Ptr& backend)
 	connect(backend.get(), SIGNAL(noteUpdated(Note::Ptr)), this, SLOT(noteUpdated(Note::Ptr)));
 	connect(this, SIGNAL(updateNote(Note::Ptr)), backend.get(), SLOT(updateNote(Note::Ptr)));
 	connect(backend.get(), SIGNAL(noteSaved(Note::Ptr)), this, SLOT(noteSaved(Note::Ptr)));
+	connect(this, SIGNAL(createNote(Notebook::Ptr)), backend.get(), SLOT(createNewNote(Notebook::Ptr)));
+	connect(backend.get(), SIGNAL(noteCreated(Note::Ptr)), this, SLOT(noteCreated(Note::Ptr)));
+
 }
 
 void MainWindow::forceNotesRefresh()
@@ -82,6 +85,23 @@ void MainWindow::notelistClicked(const QModelIndex& index)
 			LOG(WARNING) << *maybeStr;
 		}
 	}
+}
+
+void MainWindow::createNewNote()
+{
+	LOG(DEBUG) << "Clicked";
+	auto notebook = m_ui.tv_notes->currentIndex().data(NoteStorageModel::NotebookRole).value<Notebook::Ptr>();
+	if(notebook)
+	{
+		LOG(DEBUG) << "Emit";
+		emit createNote(notebook);
+	}
+}
+
+void MainWindow::noteCreated(const Note::Ptr& note)
+{
+	m_model.notesChanged();
+	setNoteAsCurrent(note);
 }
 
 void MainWindow::saveCurrentNote()
