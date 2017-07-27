@@ -6,7 +6,7 @@
 #include <boost/filesystem.hpp>
 
 #include "core/backends/common/note.h"
-#include "core/backends/common/notebook.h"
+#include "core/backends/evernote/evernotenotebook.h"
 #include "core/backends/evernote/evernoteattachment.h"
 #include "core/backends/evernote/evernotenote.h"
 
@@ -41,7 +41,7 @@ void EvernoteBackend::requestAllNotes()
 
 	LOG(DEBUG) << "EvernoteBackend: requesting all notebooks";
 	auto notebooks = m_client->listNotebooks();
-	auto root = std::make_shared<Notebook>(0, "evernote");
+	auto root = std::make_shared<EvernoteNotebook>(0);
 	for(const auto& notebook : notebooks)
 	{
 		LOG(DEBUG) << "Obtained notebook: " << notebook.name.value("[unset]") << " (" << notebook.guid.value("[unset]") << ")";
@@ -52,7 +52,8 @@ void EvernoteBackend::requestAllNotes()
 		resultSpec.includeUpdateSequenceNum = true;
 		int startIndex = 0;
 
-		auto evernoteNotebook = std::make_shared<Notebook>(notebookId, "evernote");
+		auto evernoteNotebook = std::make_shared<EvernoteNotebook>(notebookId);
+		evernoteNotebook->setGuid(notebook.guid);
 		evernoteNotebook->setTitle(notebook.name.value("[unset]"));
 		root->addNotebook(evernoteNotebook);
 		auto notesMetadata = m_client->findNotesMetadata(filter, startIndex, NotesInChunk, resultSpec);

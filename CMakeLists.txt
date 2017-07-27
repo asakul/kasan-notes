@@ -53,6 +53,7 @@ set(sources
 	core/backends/evernote/evernoteattachment.cpp
 	core/backends/evernote/evernotebackend.cpp
 	core/backends/evernote/evernotenote.cpp
+	core/backends/evernote/evernotenotebook.cpp
 	
 	core/notestorage/notestorage.cpp
 	core/notestorage/notestoragemodel.cpp
